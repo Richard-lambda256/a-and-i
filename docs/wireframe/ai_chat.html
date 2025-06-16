@@ -1,0 +1,2322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A&I - AI Learning Mentor System</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --cyber-primary: #00ffff;
+            --cyber-secondary: #ff0080;
+            --cyber-accent: #00ff41;
+            --cyber-warning: #ffaa00;
+            --cyber-bg-dark: #0a0a0f;
+            --cyber-bg-card: #1a1a2e;
+            --cyber-bg-panel: #16213e;
+            --cyber-border: #00ffff40;
+            --cyber-text: #e0e6ed;
+            --cyber-text-dim: #8892b0;
+            --cyber-glow: 0 0 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', monospace;
+            background: var(--cyber-bg-dark);
+            color: var(--cyber-text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Cyber Grid Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr 450px;
+            height: calc(100vh - 300px);
+            background: var(--cyber-bg-dark);
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Cyber Panel Base */
+        .cyber-panel {
+            background: var(--cyber-bg-card);
+            border: 1px solid var(--cyber-border);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyber-primary), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Left Sidebar - Chat Explorer */
+        .chat-explorer {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .explorer-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--cyber-border);
+            text-align: center;
+        }
+
+        .logo-container {
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            width: 160px;
+            height: 66px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 2px solid var(--cyber-primary);
+            box-shadow: var(--cyber-glow) var(--cyber-primary);
+        }
+
+        .logo h1 {
+            margin: 0;
+            font-size: 1.5em;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .system-title, .system-subtitle {
+            display: none;
+        }
+
+        .new-project-btn {
+            background: linear-gradient(45deg, var(--cyber-primary), var(--cyber-secondary));
+            border: none;
+            padding: 12px 16px;
+            border-radius: 4px;
+            color: var(--cyber-bg-dark);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 16px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .new-project-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--cyber-glow) var(--cyber-primary);
+        }
+
+        /* Tree Explorer */
+        .tree-explorer {
+            flex: 0.5;
+            padding: 0 20px;
+            overflow-y: auto;
+        }
+
+        .project-node {
+            margin-bottom: 16px;
+        }
+
+        .project-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            cursor: pointer;
+            color: var(--cyber-primary);
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .project-header:hover {
+            color: var(--cyber-accent);
+        }
+
+        .tree-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .project-node.expanded .tree-icon {
+            transform: rotate(90deg);
+        }
+
+        .conversation-list {
+            margin-left: 24px;
+            border-left: 1px solid var(--cyber-border);
+            padding-left: 16px;
+            display: none;
+        }
+
+        .project-node.expanded .conversation-list {
+            display: block;
+        }
+
+        .conversation-item {
+            margin-bottom: 8px;
+        }
+
+        .conversation-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            cursor: pointer;
+            color: var(--cyber-text);
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .conversation-header:hover {
+            color: var(--cyber-primary);
+        }
+
+        .conversation-header.active {
+            color: var(--cyber-primary);
+            font-weight: 600;
+        }
+
+        .sub-conversation-list {
+            margin-left: 20px;
+            border-left: 1px solid rgba(0,255,255,0.2);
+            padding-left: 12px;
+            display: none;
+        }
+
+        .conversation-item.expanded .sub-conversation-list {
+            display: block;
+        }
+
+        .sub-conversation-item {
+            padding: 4px 0;
+            cursor: pointer;
+            color: var(--cyber-text-dim);
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .sub-conversation-item:hover {
+            color: var(--cyber-accent);
+        }
+
+        .sub-conversation-item.active {
+            color: var(--cyber-accent);
+            font-weight: 600;
+        }
+
+        .purpose-tag {
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-left: 8px;
+        }
+
+        .tag-skill { background: rgba(0,255,255,0.2); color: var(--cyber-primary); }
+        .tag-project { background: rgba(0,255,65,0.2); color: var(--cyber-accent); }
+        .tag-career { background: rgba(255,170,0,0.2); color: var(--cyber-warning); }
+        .tag-problem { background: rgba(255,0,128,0.2); color: var(--cyber-secondary); }
+
+        /* Chat History Panel */
+        .chat-history-panel {
+            border-top: 1px solid var(--cyber-border);
+            padding: 16px 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--cyber-primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .history-item {
+            background: var(--cyber-bg-panel);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            border-color: var(--cyber-primary);
+            background: rgba(0,255,255,0.05);
+        }
+
+        .history-preview {
+            font-size: 11px;
+            color: var(--cyber-text);
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-meta {
+            font-size: 9px;
+            color: var(--cyber-text-dim);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Main Chat Area */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 300px); /* 전체 높이에서 footer 높이를 뺀 값 */
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .chat-container.footer-collapsed {
+            padding-bottom: 50px; /* 토글 버튼 높이 + 여유 공간 */
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid #00ff00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h2 {
+            margin: 0;
+            color: #00ff00;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .session-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .session-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, var(--cyber-primary), var(--cyber-accent));
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--cyber-bg-dark);
+        }
+
+        .session-details h3 {
+            font-size: 16px;
+            color: var(--cyber-text);
+            margin-bottom: 4px;
+        }
+
+        .session-progress {
+            font-size: 12px;
+            color: var(--cyber-text-dim);
+        }
+
+        .milestone-alert {
+            background: rgba(0,255,255,0.1);
+            border: 1px solid var(--cyber-primary);
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--cyber-primary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .message {
+            margin-bottom: 32px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            background: linear-gradient(45deg, var(--cyber-secondary), var(--cyber-warning));
+            color: var(--cyber-bg-dark);
+        }
+
+        .ai-avatar {
+            background: linear-gradient(45deg, var(--cyber-primary), var(--cyber-accent));
+            color: var(--cyber-bg-dark);
+        }
+
+        .message-content {
+            max-width: 75%;
+            background: var(--cyber-bg-card);
+            border: 1px solid var(--cyber-border);
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: rgba(255,0,128,0.1);
+            border-color: var(--cyber-secondary);
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid #00ff00;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            min-height: 20px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .chat-input::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff00, #00ffff);
+            border: none;
+            border-radius: 4px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .send-btn:hover {
+            background: linear-gradient(45deg, #00ffff, #00ff00);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        .send-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .send-btn:hover::before {
+            left: 100%;
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .chat-controls .cyber-button {
+            min-width: 120px;
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
+
+        #newSubChatBtn {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+        }
+
+        #newSubChatBtn:hover {
+            background: linear-gradient(45deg, #ff33ff, #33ffff);
+        }
+
+        /* Right Panel - Coaching */
+        .coaching-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .coaching-section {
+            flex: 1;
+            background: var(--cyber-bg-card);
+            border: 1px solid var(--cyber-border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .coaching-section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            color: var(--cyber-primary);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--cyber-border);
+        }
+
+        .coaching-content {
+            color: var(--cyber-text);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Coaching Panel Styles */
+        .coaching-item {
+            margin-bottom: 20px;
+            padding: 12px;
+            background: var(--cyber-bg-panel);
+            border-radius: 4px;
+            border: 1px solid var(--cyber-border);
+        }
+
+        .coaching-item-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--cyber-primary);
+            margin-bottom: 8px;
+        }
+
+        .coaching-item-content {
+            font-size: 13px;
+            color: var(--cyber-text);
+            line-height: 1.5;
+        }
+
+        .keyword-tag, .category-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            background: var(--cyber-bg-dark);
+            border: 1px solid var(--cyber-primary);
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--cyber-primary);
+        }
+
+        .context-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .context-list li {
+            margin-bottom: 4px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .context-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--cyber-primary);
+        }
+
+        .scope-optimization {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scope-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .scope-label {
+            color: var(--cyber-text-dim);
+            font-size: 12px;
+            min-width: 80px;
+        }
+
+        .scope-value {
+            color: var(--cyber-text);
+            font-size: 13px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--cyber-bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--cyber-primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cyber-accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 280px 1fr 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .chat-explorer, .coaching-panel {
+                display: none;
+            }
+        }
+
+        /* 최적화된 질문 섹션 스타일 */
+        .optimized-question-section {
+            margin-top: 24px;
+            padding: 16px;
+            background: var(--cyber-bg-panel);
+            border: 1px solid var(--cyber-primary);
+            border-radius: 8px;
+        }
+
+        .optimized-question-content {
+            margin: 16px 0;
+        }
+
+        .optimized-question {
+            padding: 16px;
+            background: var(--cyber-bg-dark);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--cyber-text);
+            margin-bottom: 16px;
+        }
+
+        .optimization-benefits {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--cyber-text-dim);
+        }
+
+        .benefit-icon {
+            color: var(--cyber-primary);
+        }
+
+        .question-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .use-optimized-btn {
+            background: linear-gradient(45deg, var(--cyber-primary), var(--cyber-secondary));
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            color: var(--cyber-bg-dark);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .use-optimized-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--cyber-glow) var(--cyber-primary);
+        }
+
+        .or-divider {
+            text-align: center;
+            color: var(--cyber-text-dim);
+            font-size: 12px;
+            position: relative;
+        }
+
+        .or-divider::before,
+        .or-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: var(--cyber-border);
+        }
+
+        .or-divider::before {
+            left: 0;
+        }
+
+        .or-divider::after {
+            right: 0;
+        }
+
+        .custom-question-input {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-question-input textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            background: var(--cyber-bg-dark);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            color: var(--cyber-text);
+            font-family: 'Rajdhani', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .send-custom-btn {
+            background: var(--cyber-bg-card);
+            border: 1px solid var(--cyber-primary);
+            padding: 12px;
+            border-radius: 4px;
+            color: var(--cyber-primary);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-custom-btn:hover {
+            background: var(--cyber-primary);
+            color: var(--cyber-bg-dark);
+        }
+
+        /* 탭 스타일 */
+        .coaching-tabs {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-header {
+            display: flex;
+            border-bottom: 1px solid var(--cyber-border);
+            background: var(--cyber-bg-panel);
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            color: var(--cyber-text-dim);
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            color: var(--cyber-text);
+        }
+
+        .tab-button.active {
+            color: var(--cyber-primary);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--cyber-primary);
+            box-shadow: var(--cyber-glow) var(--cyber-primary);
+        }
+
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-pane {
+            display: none;
+            height: 100%;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .empty-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--cyber-text-dim);
+            font-size: 16px;
+            font-family: 'Rajdhani', monospace;
+        }
+
+        /* 원본 질문 사용 버튼 스타일 */
+        .use-original-btn {
+            background: var(--cyber-bg-card);
+            border: 1px solid var(--cyber-border);
+            padding: 12px;
+            border-radius: 4px;
+            color: var(--cyber-text);
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .use-original-btn:hover {
+            border-color: var(--cyber-primary);
+            color: var(--cyber-primary);
+        }
+
+        /* 기존 버튼 스타일 수정 */
+        .use-optimized-btn {
+            width: 100%;
+        }
+
+        .send-custom-btn {
+            width: 100%;
+        }
+
+        /* 새로운 스타일 추가 */
+        .memory-options, .format-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .memory-btn, .format-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--cyber-bg-panel);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            color: var(--cyber-text);
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .memory-btn:hover, .format-btn:hover {
+            border-color: var(--cyber-primary);
+            background: rgba(0,255,255,0.05);
+        }
+
+        .memory-icon, .format-icon {
+            font-size: 18px;
+        }
+
+        .format-preview {
+            background: var(--cyber-bg-panel);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .format-type {
+            font-family: 'Orbitron', monospace;
+            color: var(--cyber-primary);
+            margin-bottom: 8px;
+        }
+
+        .format-example {
+            font-size: 13px;
+            color: var(--cyber-text);
+            white-space: pre-wrap;
+        }
+
+        .memory-impact {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .memory-section {
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .memory-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: var(--neon-blue);
+        }
+
+        .memory-header i {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        .impact-score {
+            margin-left: auto;
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .related-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .related-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--neon-purple);
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .question-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .question-text {
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        .question-date {
+            color: var(--neon-purple);
+            font-size: 0.8em;
+        }
+
+        .go-to-conversation {
+            background: var(--neon-purple);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.9em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .go-to-conversation:hover {
+            background: var(--neon-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .go-to-conversation i {
+            font-size: 0.9em;
+        }
+
+        /* 데모 컨트롤 스타일 */
+        .demo-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .demo-btn {
+            background: var(--cyber-primary);
+            color: var(--cyber-bg-dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: 'Orbitron', monospace;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyber-primary);
+            transition: all 0.3s ease;
+        }
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px var(--cyber-primary);
+        }
+
+        /* 질문 전송 후 스타일 */
+        .optimized-question.sent {
+            opacity: 0.7;
+        }
+        .optimized-question.sent .question-actions button {
+            cursor: not-allowed;
+        }
+        .optimized-question.sent .question-actions button.used {
+            background: var(--cyber-primary);
+            color: var(--cyber-bg-dark);
+            box-shadow: 0 0 15px var(--cyber-primary);
+            cursor: default;
+        }
+
+        /* 메모리 저장 섹션 스타일 */
+        .memory-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--cyber-bg-panel);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .memory-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .memory-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .memory-label {
+            font-family: 'Orbitron', monospace;
+            color: var(--cyber-text);
+            font-size: 14px;
+        }
+
+        .memory-desc {
+            color: var(--cyber-text-dim);
+            font-size: 12px;
+        }
+
+        .memory-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--cyber-bg-dark);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            color: var(--cyber-text);
+            font-family: 'Orbitron', monospace;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .memory-btn:hover {
+            border-color: var(--cyber-primary);
+            background: rgba(0,255,255,0.05);
+        }
+
+        .memory-btn.saved {
+            background: var(--cyber-primary);
+            color: var(--cyber-bg-dark);
+            border-color: var(--cyber-primary);
+            cursor: default;
+        }
+
+        .memory-btn.saved .btn-icon {
+            content: '✓';
+        }
+
+        .chat-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .chat-controls .cyber-button {
+            min-width: 120px;
+            font-size: 0.9em;
+            padding: 8px 15px;
+        }
+
+        #newSubChatBtn {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+        }
+
+        #newSubChatBtn:hover {
+            background: linear-gradient(45deg, #ff33ff, #33ffff);
+        }
+
+        .original-question {
+            opacity: 0.5;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .optimized-question {
+            background: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid #00ff00;
+            margin-top: 10px;
+        }
+
+        .optimized-question .message-content {
+            color: #00ff00;
+        }
+
+        .optimized-question .message-meta {
+            color: #00ff00;
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 300px;
+            background: var(--cyber-bg-dark);
+            padding: 20px;
+            border-top: 1px solid var(--cyber-border);
+            z-index: 1000;
+        }
+
+        .insight-map-panel {
+            height: 100%;
+            background: var(--cyber-bg-card);
+            display: flex;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--cyber-border);
+            overflow: hidden;
+        }
+
+        .keyword-badges {
+            width: 60%;
+            padding: 20px;
+            border-right: 1px solid var(--cyber-border);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: flex-start;
+            background: var(--cyber-bg-dark);
+        }
+
+        .keyword-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0; /* 텍스트 오버플로우 방지 */
+        }
+
+        .keyword-section h3 {
+            color: var(--cyber-primary);
+            margin: 0;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .keyword-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background: var(--cyber-bg-dark);
+            border: 1px solid var(--cyber-border);
+            border-radius: 12px;
+            color: var(--cyber-text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            white-space: nowrap;
+        }
+
+        .keyword-badge:hover {
+            border-color: var(--cyber-primary);
+            color: var(--cyber-primary);
+            box-shadow: var(--cyber-glow);
+        }
+
+        .keyword-badge.active {
+            background: var(--cyber-primary);
+            color: var(--cyber-bg-dark);
+            border-color: var(--cyber-primary);
+        }
+
+        .detail-content {
+            width: 40%;
+            padding: 20px;
+            background: var(--cyber-bg-dark);
+            border-left: 1px solid var(--cyber-border);
+            display: block;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--cyber-border);
+        }
+
+        .detail-header h3 {
+            color: var(--cyber-primary);
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        .close-detail {
+            background: none;
+            border: none;
+            color: var(--cyber-text);
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: color 0.3s ease;
+        }
+
+        .close-detail:hover {
+            color: var(--cyber-primary);
+        }
+
+        .detail-body {
+            max-height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: var(--cyber-bg-card);
+            border: 1px solid var(--cyber-border);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .conversation-item:hover {
+            border-color: var(--cyber-primary);
+            box-shadow: var(--cyber-glow);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar - Chat Explorer -->
+        <div class="cyber-panel chat-explorer">
+            <div class="explorer-header">
+                <div class="logo-container">
+                    <img src="logo.png" alt="A&I Logo" class="logo">
+                </div>
+                <div class="system-title">A&I</div>
+            </div>
+
+            <button class="new-project-btn" onclick="showPurposeModal()">
+                + NEW PROJECT
+            </button>
+
+            <div class="tree-explorer">
+                <!-- Project 1: React Mastery -->
+                <div class="project-node expanded">
+                    <div class="project-header" onclick="toggleProject(this)">
+                        <span class="tree-icon">▶</span>
+                        <span>React Mastery Protocol</span>
+                    </div>
+                    <div class="conversation-list">
+                        <div class="conversation-item expanded">
+                            <div class="conversation-header active" onclick="toggleConversation(this)">
+                                <span class="tree-icon">▶</span>
+                                <span>Advanced Patterns</span>
+                                <span class="purpose-tag tag-skill">SKILL</span>
+                            </div>
+                            <div class="sub-conversation-list">
+                                <div class="sub-conversation-item active">Context API Deep Dive</div>
+                                <div class="sub-conversation-item">useReducer Patterns</div>
+                                <div class="sub-conversation-item">Performance Optimization</div>
+                            </div>
+                        </div>
+                        <div class="conversation-item">
+                            <div class="conversation-header" onclick="toggleConversation(this)">
+                                <span class="tree-icon">▶</span>
+                                <span>Custom Hooks</span>
+                                <span class="purpose-tag tag-skill">SKILL</span>
+                            </div>
+                            <div class="sub-conversation-list">
+                                <div class="sub-conversation-item">Hook Design Patterns</div>
+                                <div class="sub-conversation-item">State Management Hooks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2: Portfolio Development -->
+                <div class="project-node">
+                    <div class="project-header" onclick="toggleProject(this)">
+                        <span class="tree-icon">▶</span>
+                        <span>Portfolio Development</span>
+                    </div>
+                    <div class="conversation-list">
+                        <div class="conversation-item">
+                            <div class="conversation-header" onclick="toggleConversation(this)">
+                                <span class="tree-icon">▶</span>
+                                <span>Frontend Implementation</span>
+                                <span class="purpose-tag tag-project">PROJECT</span>
+                            </div>
+                            <div class="sub-conversation-list">
+                                <div class="sub-conversation-item">UI/UX Design</div>
+                                <div class="sub-conversation-item">Responsive Layout</div>
+                                <div class="sub-conversation-item">Animation Effects</div>
+                            </div>
+                        </div>
+                        <div class="conversation-item">
+                            <div class="conversation-header" onclick="toggleConversation(this)">
+                                <span class="tree-icon">▶</span>
+                                <span>Deployment Strategy</span>
+                                <span class="purpose-tag tag-project">PROJECT</span>
+                            </div>
+                            <div class="sub-conversation-list">
+                                <div class="sub-conversation-item">CI/CD Pipeline</div>
+                                <div class="sub-conversation-item">Performance Monitoring</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3: Career Transition -->
+                <div class="project-node">
+                    <div class="project-header" onclick="toggleProject(this)">
+                        <span class="tree-icon">▶</span>
+                        <span>Career Transition</span>
+                    </div>
+                    <div class="conversation-list">
+                        <div class="conversation-item">
+                            <div class="conversation-header" onclick="toggleConversation(this)">
+                                <span class="tree-icon">▶</span>
+                                <span>Skill Assessment</span>
+                                <span class="purpose-tag tag-career">CAREER</span>
+                            </div>
+                            <div class="sub-conversation-list">
+                                <div class="sub-conversation-item">Technical Skills Gap</div>
+                                <div class="sub-conversation-item">Learning Roadmap</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat History Panel -->
+            <div class="chat-history-panel">
+                <div class="history-title">Recent Messages</div>
+                <div class="history-item">
+                    <div class="history-preview">React에서 상태 관리 어떻게 해야 할까?</div>
+                    <div class="history-meta">
+                        <span>User</span>
+                        <span>2분 전</span>
+                    </div>
+                </div>
+                <div class="history-item">
+                    <div class="history-preview">Context API와 useReducer 패턴 조합에 대해 설명드리겠습니다...</div>
+                    <div class="history-meta">
+                        <span>AI</span>
+                        <span>1분 전</span>
+                    </div>
+                </div>
+                <div class="history-item">
+                    <div class="history-preview">성능 최적화 관점에서 어떤 패턴을 선택해야 하나요?</div>
+                    <div class="history-meta">
+                        <span>User</span>
+                        <span>방금</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Panel -->
+        <div class="cyber-panel chat-panel">
+            <div class="chat-header">
+                <h2>Context API Deep Dive</h2>
+                <div class="session-id">Session: 2024-03-21-001</div>
+            </div>
+
+            <div class="chat-messages">
+                <div class="message user-message original-question">
+                    <div class="message-content">
+                        React에서 상태 관리 어떻게 해야 할까?
+                    </div>
+                    <div class="message-meta">
+                        <span class="timestamp">2024-03-21 14:30</span>
+                    </div>
+                </div>
+                <div class="message user-message optimized-question">
+                    <div class="message-content">
+                        React 애플리케이션에서 상태 관리를 구현할 때 Context API와 useReducer를 함께 사용하는 방법과 각각의 장단점, 그리고 실제 프로젝트에서의 적용 사례를 알려주세요.
+                    </div>
+                    <div class="message-meta">
+                        <span class="timestamp">2024-03-21 14:31</span>
+                        <span class="optimized-tag">최적화된 질문</span>
+                    </div>
+                </div>
+                <div class="message ai-message">
+                    <div class="message-content">
+                        <h3>React 상태 관리: Context API + useReducer 패턴</h3>
+                        <p>Context API와 useReducer를 함께 사용하는 것은 React 애플리케이션에서 상태 관리를 구현하는 강력한 방법입니다. 이 패턴은 다음과 같은 장점을 제공합니다:</p>
+                        <ul>
+                            <li>전역 상태 관리의 단순화</li>
+                            <li>상태 로직의 중앙화</li>
+                            <li>성능 최적화 용이성</li>
+                        </ul>
+                        <h4>구현 예시:</h4>
+                        <pre><code>// StateContext.js
+const StateContext = createContext();
+
+export const StateProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  return (
+    <StateContext.Provider value={{ state, dispatch }}>
+      {children}
+    </StateContext.Provider>
+  );
+};</code></pre>
+                    </div>
+                    <div class="message-meta">
+                        <span class="timestamp">2024-03-21 14:32</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <textarea class="chat-input" placeholder="질문을 입력하세요..." rows="1"></textarea>
+                    <button class="send-btn">COACHING</button>
+                </div>
+                <div class="chat-controls">
+                    <button id="newChatBtn" class="cyber-button">
+                        <span class="cyber-button__glitch"></span>
+                        <span class="cyber-button__text">New Chat</span>
+                    </button>
+                    <button id="newSubChatBtn" class="cyber-button">
+                        <span class="cyber-button__glitch"></span>
+                        <span class="cyber-button__text">New Sub Chat</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Control Panel -->
+        <div class="cyber-panel coaching-panel">
+            <div class="coaching-tabs">
+                <div class="tab-header">
+                    <div class="tab-button active" data-tab="pre-coaching">질문 전 코칭</div>
+                    <div class="tab-button" data-tab="post-coaching">질문 후 코칭</div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="pre-coaching">
+                        <div class="coaching-content">
+                            <div class="empty-state" style="display: none;">
+                                새로운 질문을 시작하세요.
+                            </div>
+                            <div class="coaching-items">
+                                <div class="coaching-item">
+                                    <div class="coaching-item-title">핵심 키워드 추출</div>
+                                    <div class="coaching-item-content">
+                                        <div class="keyword-tag">React</div>
+                                        <div class="keyword-tag">Hooks</div>
+                                        <div class="keyword-tag">useEffect</div>
+                                    </div>
+                                </div>
+
+                                <div class="coaching-item">
+                                    <div class="coaching-item-title">질문 요약</div>
+                                    <div class="coaching-item-content">
+                                        React useEffect Hook의 의존성 배열과 클린업 함수 사용에 대한 질문
+                                    </div>
+                                </div>
+
+                                <div class="coaching-item">
+                                    <div class="coaching-item-title">카테고리 분류 및 목적 재정의</div>
+                                    <div class="coaching-item-content">
+                                        <div class="category-tag">React</div>
+                                        <div class="category-tag">Hooks</div>
+                                        <div class="category-tag">Best Practices</div>
+                                    </div>
+                                </div>
+
+                                <div class="coaching-item">
+                                    <div class="coaching-item-title">맥락 보강 제안</div>
+                                    <div class="coaching-item-content">
+                                        <ul class="context-list">
+                                            <li>현재 구현 중인 컴포넌트의 목적</li>
+                                            <li>useEffect 내부의 비동기 처리 방식</li>
+                                            <li>이전에 시도한 해결 방법</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="coaching-item">
+                                    <div class="coaching-item-title">질문 범위 최적화</div>
+                                    <div class="coaching-item-content">
+                                        <div class="scope-optimization">
+                                            <div class="scope-item">
+                                                <span class="scope-label">핵심 주제:</span>
+                                                <span class="scope-value">useEffect 의존성 관리</span>
+                                            </div>
+                                            <div class="scope-item">
+                                                <span class="scope-label">세부 포인트:</span>
+                                                <span class="scope-value">클린업 함수, 의존성 배열 최적화</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="coaching-item">
+                                    <div class="coaching-item-title">📝 최적화된 질문</div>
+                                    <div class="coaching-item-content">
+                                        <div class="optimized-question">
+                                            <div class="question-text">React의 상태 관리에 대해 설명해주세요. 특히 useState, useReducer, Context API의 차이점과 각각의 사용 사례를 중심으로 설명해주시면 좋겠습니다.</div>
+                                            <div class="question-benefits">
+                                                <div class="benefit-item">
+                                                    <span class="benefit-icon">🎯</span>
+                                                    <span class="benefit-text">구체적인 사용 사례 포함</span>
+                                                </div>
+                                                <div class="benefit-item">
+                                                    <span class="benefit-icon">🔍</span>
+                                                    <span class="benefit-text">핵심 개념 비교</span>
+                                                </div>
+                                                <div class="benefit-item">
+                                                    <span class="benefit-icon">💡</span>
+                                                    <span class="benefit-text">실무 적용 가능</span>
+                                                </div>
+                                            </div>
+                                            <div class="question-actions">
+                                                <button class="action-btn primary" onclick="useOptimizedQuestion(this)" disabled>
+                                                    <span class="btn-icon">✨</span>
+                                                    <span class="btn-text">수정된 질문 사용</span>
+                                                </button>
+                                                <button class="action-btn secondary" onclick="editQuestion(this)" disabled>
+                                                    <span class="btn-icon">✏️</span>
+                                                    <span class="btn-text">직접 수정하기</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="post-coaching">
+                        <div class="coaching-content">
+                            <div class="coaching-items">
+                                <!-- 메모리 저장 섹션 -->
+                                <div class="coaching-item">
+                                    <div class="coaching-item-title">💾 메모리 저장</div>
+                                    <div class="coaching-item-content">
+                                        <div class="memory-options">
+                                            <!-- 전역 메모리 -->
+                                            <div class="memory-option">
+                                                <div class="memory-info">
+                                                    <span class="memory-icon">🌐</span>
+                                                    <div class="memory-details">
+                                                        <span class="memory-label">전역 메모리</span>
+                                                        <span class="memory-desc">모든 대화방에서 접근 가능</span>
+                                                    </div>
+                                                </div>
+                                                <button class="memory-btn global" onclick="saveToMemory('global')">
+                                                    <span class="btn-icon">💾</span>
+                                                    <span class="btn-text">저장</span>
+                                                </button>
+                                            </div>
+
+                                            <!-- 프로젝트 메모리 -->
+                                            <div class="memory-option">
+                                                <div class="memory-info">
+                                                    <span class="memory-icon">📁</span>
+                                                    <div class="memory-details">
+                                                        <span class="memory-label">프로젝트 메모리</span>
+                                                        <span class="memory-desc">현재 프로젝트의 모든 대화방에서 접근 가능</span>
+                                                    </div>
+                                                </div>
+                                                <button class="memory-btn project" onclick="saveToMemory('project')">
+                                                    <span class="btn-icon">💾</span>
+                                                    <span class="btn-text">저장</span>
+                                                </button>
+                                            </div>
+
+                                            <!-- 대화방 메모리 -->
+                                            <div class="memory-option">
+                                                <div class="memory-info">
+                                                    <span class="memory-icon">💬</span>
+                                                    <div class="memory-details">
+                                                        <span class="memory-label">대화방 메모리</span>
+                                                        <span class="memory-desc">현재 대화방에서만 접근 가능</span>
+                                                    </div>
+                                                </div>
+                                                <button class="memory-btn room" onclick="saveToMemory('room')">
+                                                    <span class="btn-icon">💾</span>
+                                                    <span class="btn-text">저장</span>
+                                                </button>
+                                            </div>
+
+                                            <!-- 부모 대화방 메모리 -->
+                                            <div class="memory-option parent" style="display: none;">
+                                                <div class="memory-info">
+                                                    <span class="memory-icon">↩️</span>
+                                                    <div class="memory-details">
+                                                        <span class="memory-label">부모 대화방 메모리</span>
+                                                        <span class="memory-desc">부모 대화방에서만 접근 가능</span>
+                                                    </div>
+                                                </div>
+                                                <button class="memory-btn parent" onclick="saveToMemory('parent')">
+                                                    <span class="btn-icon">💾</span>
+                                                    <span class="btn-text">저장</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 요청 형식 섹션 -->
+                                <div class="coaching-item request-format">
+                                    <div class="coaching-item-title">📝 요청 형식 감지</div>
+                                    <div class="coaching-item-content">
+                                        <div class="format-preview">
+                                            <div class="format-type">비교 분석 형식</div>
+                                            <div class="format-example">각 상태 관리 방식의 특징과 사용 사례를 비교 분석하는 형식으로 응답이 구성되었습니다.</div>
+                                        </div>
+                                        <div class="format-options">
+                                            <button class="format-btn global">
+                                                <span class="format-icon">🌐</span>
+                                                <span class="format-label">전역에 적용</span>
+                                            </button>
+                                            <button class="format-btn project">
+                                                <span class="format-icon">📁</span>
+                                                <span class="format-label">프로젝트에 적용</span>
+                                            </button>
+                                            <button class="format-btn parent" style="display: none;">
+                                                <span class="format-icon">↩️</span>
+                                                <span class="format-label">부모 대화방에 적용</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 메모리 영향 분석 섹션 -->
+                                <div class="coaching-item memory-impact">
+                                    <h3>메모리 영향 분석</h3>
+                                    <div class="memory-impact-content">
+                                        <!-- 전역 기억 연관성 -->
+                                        <div class="memory-section">
+                                            <div class="memory-header">
+                                                <i class="fas fa-globe"></i>
+                                                <span>전역 기억 연관성</span>
+                                                <span class="impact-score">75%</span>
+                                            </div>
+                                            <div class="related-questions">
+                                                <div class="related-question">
+                                                    <div class="question-preview">
+                                                        <span class="question-text">React와 Vue의 차이점에 대해 질문했던 내용이 있습니다.</span>
+                                                        <span class="question-date">2024-02-15</span>
+                                                    </div>
+                                                    <button class="go-to-conversation">
+                                                        <i class="fas fa-external-link-alt"></i>
+                                                        해당 대화로 이동
+                                                    </button>
+                                                </div>
+                                                <div class="related-question">
+                                                    <div class="question-preview">
+                                                        <span class="question-text">프론트엔드 프레임워크 선택 기준에 대한 논의가 있었습니다.</span>
+                                                        <span class="question-date">2024-02-10</span>
+                                                    </div>
+                                                    <button class="go-to-conversation">
+                                                        <i class="fas fa-external-link-alt"></i>
+                                                        해당 대화로 이동
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 프로젝트 기억 연관성 -->
+                                        <div class="memory-section">
+                                            <div class="memory-header">
+                                                <i class="fas fa-project-diagram"></i>
+                                                <span>프로젝트 기억 연관성</span>
+                                                <span class="impact-score">60%</span>
+                                            </div>
+                                            <div class="related-questions">
+                                                <div class="related-question">
+                                                    <div class="question-preview">
+                                                        <span class="question-text">현재 프로젝트의 아키텍처 설계 관련 논의가 있었습니다.</span>
+                                                        <span class="question-date">2024-02-18</span>
+                                                    </div>
+                                                    <button class="go-to-conversation">
+                                                        <i class="fas fa-external-link-alt"></i>
+                                                        해당 대화로 이동
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 부모 대화방 연관성 -->
+                                        <div class="memory-section">
+                                            <div class="memory-header">
+                                                <i class="fas fa-sitemap"></i>
+                                                <span>부모 대화방 연관성</span>
+                                                <span class="impact-score">45%</span>
+                                            </div>
+                                            <div class="related-questions">
+                                                <div class="related-question">
+                                                    <div class="question-preview">
+                                                        <span class="question-text">상위 대화방에서 비슷한 주제로 논의가 있었습니다.</span>
+                                                        <span class="question-date">2024-02-20</span>
+                                                    </div>
+                                                    <button class="go-to-conversation">
+                                                        <i class="fas fa-external-link-alt"></i>
+                                                        해당 대화로 이동
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 현재 대화방 연관성 -->
+                                        <div class="memory-section">
+                                            <div class="memory-header">
+                                                <i class="fas fa-comments"></i>
+                                                <span>현재 대화방 연관성</span>
+                                                <span class="impact-score">90%</span>
+                                            </div>
+                                            <div class="related-questions">
+                                                <div class="related-question">
+                                                    <div class="question-preview">
+                                                        <span class="question-text">이전 질문에서 연관된 내용을 논의했습니다.</span>
+                                                        <span class="question-date">2024-02-21</span>
+                                                    </div>
+                                                    <button class="go-to-conversation">
+                                                        <i class="fas fa-external-link-alt"></i>
+                                                        해당 대화로 이동
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer 영역 -->
+    <footer class="footer">
+        <div class="insight-map-panel">
+            <div class="keyword-badges">
+                <div class="keyword-section">
+                    <h3>전역 기억</h3>
+                    <div class="badge-container">
+                        <span class="keyword-badge active">React</span>
+                        <span class="keyword-badge">Vue</span>
+                        <span class="keyword-badge">프레임워크</span>
+                    </div>
+                </div>
+                <div class="keyword-section">
+                    <h3>프로젝트 기억</h3>
+                    <div class="badge-container">
+                        <span class="keyword-badge">컴포넌트</span>
+                        <span class="keyword-badge">상태관리</span>
+                    </div>
+                </div>
+                <div class="keyword-section">
+                    <h3>대화방 기억</h3>
+                    <div class="badge-container">
+                        <span class="keyword-badge">리팩토링</span>
+                        <span class="keyword-badge">성능</span>
+                    </div>
+                </div>
+                <div class="keyword-section">
+                    <h3>서브대화방 기억</h3>
+                    <div class="badge-container">
+                        <span class="keyword-badge">최적화</span>
+                        <span class="keyword-badge">디버깅</span>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-content active">
+                <div class="detail-header">
+                    <h3>React</h3>
+                    <button class="close-detail"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="detail-body">
+                    <div class="conversation-item">
+                        <div class="conversation-header">
+                            <span>2024-02-20 14:30</span>
+                        </div>
+                        <div class="conversation-content">
+                            <div class="question">React 컴포넌트 최적화 방법에 대해 설명해주세요.</div>
+                            <div class="answer">React.memo, useMemo, useCallback 등을 사용한 최적화 방법에 대해 설명드리겠습니다...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tree Explorer Functions
+        function toggleProject(element) {
+            const projectNode = element.parentElement;
+            projectNode.classList.toggle('expanded');
+        }
+
+        function toggleConversation(element) {
+            const conversationItem = element.parentElement;
+            conversationItem.classList.toggle('expanded');
+
+            // Remove active class from all conversation headers
+            document.querySelectorAll('.conversation-header').forEach(header => {
+                header.classList.remove('active');
+            });
+
+            // Add active class to clicked header
+            element.classList.add('active');
+
+            // Update chat title
+            const chatTitle = document.querySelector('.chat-title');
+            const conversationName = element.querySelector('span:nth-child(2)').textContent;
+            chatTitle.textContent = conversationName.toUpperCase();
+        }
+
+        // Sub-conversation selection
+        document.querySelectorAll('.sub-conversation-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all sub-conversations
+                document.querySelectorAll('.sub-conversation-item').forEach(subItem => {
+                    subItem.classList.remove('active');
+                });
+
+                // Add active class to clicked item
+                this.classList.add('active');
+
+                // Update chat title
+                const chatTitle = document.querySelector('.chat-title');
+                chatTitle.textContent = this.textContent.toUpperCase();
+            });
+        });
+
+        // Chat Input Auto-resize
+        const chatInput = document.querySelector('.chat-input');
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Send Message
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const input = document.querySelector('.chat-input');
+            const message = input.value.trim();
+            if (message) {
+                console.log('Transmitting neural query:', message);
+                input.value = '';
+                input.style.height = 'auto';
+            }
+        }
+
+        document.querySelector('.send-btn').addEventListener('click', sendMessage);
+
+        // Modal placeholder function
+        function showPurposeModal() {
+            alert('New project initialization protocol will be implemented here!');
+        }
+
+        // 탭 전환 기능
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // 모든 탭 버튼에서 active 클래스 제거
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // 클릭된 버튼에 active 클래스 추가
+                button.classList.add('active');
+
+                // 모든 탭 패널 숨기기
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('active');
+                });
+                // 선택된 탭 패널 표시
+                document.getElementById(button.dataset.tab).classList.add('active');
+            });
+        });
+
+        // 코칭 버튼 클릭 시 질문 전 코칭 탭 활성화
+        document.getElementById('send-button').addEventListener('click', () => {
+            document.querySelector('[data-tab="pre-coaching"]').click();
+        });
+
+        // AI 응답 처리 함수
+        function handleAIResponse(response) {
+            const aiMessage = document.createElement('div');
+            aiMessage.className = 'message ai-message';
+            aiMessage.innerHTML = `
+                <div class="message-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=ai" alt="AI">
+                </div>
+                <div class="message-content">
+                    <div class="message-text">${response}</div>
+                    <div class="message-meta">
+                        <span class="message-time">${new Date().toLocaleTimeString()}</span>
+                        <div class="message-actions">
+                            <button class="action-btn" onclick="copyMessage(this)">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="action-btn" onclick="saveMessage(this)">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(aiMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // 질문 후 코칭 탭 활성화 및 내용 표시
+            document.querySelector('button[data-tab="post-coaching"]').click();
+            const coachingItems = document.querySelector('#post-coaching .coaching-items');
+            const emptyState = document.querySelector('#post-coaching .empty-state');
+            coachingItems.style.display = 'block';
+            emptyState.style.display = 'none';
+
+            // 메모리 영향 분석 업데이트 (예시 데이터)
+            updateMemoryImpact({
+                global: Math.floor(Math.random() * 100),
+                project: Math.floor(Math.random() * 100),
+                parent: Math.floor(Math.random() * 100)
+            });
+
+            // 요청 형식 감지 (예시)
+            const formatRequest = detectFormatRequest(response);
+            if (formatRequest) {
+                showFormatRequest(formatRequest);
+            }
+        }
+
+        // 메모리 영향 분석 업데이트 함수
+        function updateMemoryImpact(impact) {
+            const impactValues = document.querySelectorAll('.impact-value');
+            impactValues[0].textContent = `${impact.global}%`;
+            impactValues[1].textContent = `${impact.project}%`;
+
+            const parentImpact = document.querySelector('.parent-impact');
+            if (parentImpact) {
+                parentImpact.style.display = 'block';
+                impactValues[2].textContent = `${impact.parent}%`;
+            }
+
+            // 차트 업데이트 (간단한 예시)
+            const chart = document.querySelector('.impact-chart');
+            chart.innerHTML = `
+                <div style="display: flex; height: 100%; align-items: flex-end; gap: 8px;">
+                    <div style="flex: 1; background: var(--cyber-primary); height: ${impact.global}%; opacity: 0.7;"></div>
+                    <div style="flex: 1; background: var(--cyber-primary); height: ${impact.project}%; opacity: 0.7;"></div>
+                    ${parentImpact ? `<div style="flex: 1; background: var(--cyber-primary); height: ${impact.parent}%; opacity: 0.7;"></div>` : ''}
+                </div>
+            `;
+        }
+
+        // 요청 형식 감지 함수
+        function detectFormatRequest(question, context) {
+            let detectedFormats = [];
+
+            // 각 형식별 점수 계산
+            for (const [format, rules] of Object.entries(formatDetectionRules)) {
+                let score = 0;
+
+                // 1. 키워드 매칭 점수 (40점)
+                const primaryKeywords = rules.keywords.primary.filter(keyword =>
+                    question.includes(keyword)
+                );
+                const secondaryKeywords = rules.keywords.secondary.filter(keyword =>
+                    question.includes(keyword)
+                );
+
+                score += primaryKeywords.length * 10; // 핵심 키워드당 10점
+                score += secondaryKeywords.length * 5; // 보조 키워드당 5점
+
+                // 2. 문장 구조 점수 (30점)
+                const hasMatchingPattern = rules.sentencePatterns.some(pattern =>
+                    pattern.test(question)
+                );
+                if (hasMatchingPattern) {
+                    score += 15;
+                }
+
+                // 문장의 복잡성 평가
+                const sentenceComplexity = question.split(' ').length;
+                if (sentenceComplexity > 10) {
+                    score += 15;
+                }
+
+                // 3. 컨텍스트 일치 점수 (30점)
+                if (context) {
+                    // 이전 대화와의 연관성
+                    if (context.previousFormats && context.previousFormats.includes(format)) {
+                        score += 10;
+                    }
+
+                    // 프로젝트 컨텍스트 일치
+                    if (context.projectContext && context.projectContext.includes(format)) {
+                        score += 10;
+                    }
+
+                    // 학습 경로 연관성
+                    if (context.learningPath && context.learningPath.includes(format)) {
+                        score += 10;
+                    }
+                }
+
+                // 최종 점수가 임계값을 넘는 경우 형식 감지
+                if (score >= rules.minScore) {
+                    detectedFormats.push({
+                        format,
+                        score,
+                        confidence: score >= 90 ? 'high' : 'medium'
+                    });
+                }
+            }
+
+            return detectedFormats;
+        }
+
+        function updateFormatDetectionUI(detectedFormats) {
+            const formatDetectionSection = document.querySelector('.request-format');
+            const formatPreview = document.querySelector('.format-preview');
+            const formatExample = document.querySelector('.format-example');
+
+            if (detectedFormats.length === 0) {
+                formatDetectionSection.style.display = 'none';
+                return;
+            }
+
+            formatDetectionSection.style.display = 'block';
+
+            // 가장 높은 점수의 형식 선택
+            const bestFormat = detectedFormats.reduce((prev, current) =>
+                (prev.score > current.score) ? prev : current
+            );
+
+            // 형식별 예시 텍스트
+            const formatExamples = {
+                table: {
+                    preview: '테이블 형식으로 데이터를 구조화하여 표시합니다.',
+                    example: '| 항목 | 설명 |\n|------|------|\n| 예시1 | 설명1 |\n| 예시2 | 설명2 |'
+                },
+                markdown: {
+                    preview: '마크다운 형식으로 문서를 구조화하여 표시합니다.',
+                    example: '# 제목\n## 부제목\n- 항목1\n- 항목2\n```코드 블록```'
+                },
+                summary: {
+                    preview: '핵심 내용을 간단히 요약하여 표시합니다.',
+                    example: '• 핵심 포인트 1\n• 핵심 포인트 2\n• 핵심 포인트 3'
+                },
+                stepByStep: {
+                    preview: '단계별로 과정을 설명하여 표시합니다.',
+                    example: '1. 첫 번째 단계\n2. 두 번째 단계\n3. 세 번째 단계'
+                }
+            };
+
+            // UI 업데이트
+            formatPreview.textContent = formatExamples[bestFormat.format].preview;
+            formatExample.textContent = formatExamples[bestFormat.format].example;
+
+            // 신뢰도에 따른 스타일 적용
+            if (bestFormat.confidence === 'high') {
+                formatDetectionSection.classList.add('high-confidence');
+            } else {
+                formatDetectionSection.classList.add('medium-confidence');
+            }
+        }
+
+        // 메모리 저장 함수
+        function saveToMemory(type) {
+            const button = document.querySelector(`.memory-btn.${type}`);
+            if (button.classList.contains('saved')) return;
+
+            // 저장 애니메이션
+            button.style.opacity = '0.7';
+            setTimeout(() => {
+                button.classList.add('saved');
+                button.style.opacity = '1';
+                button.querySelector('.btn-icon').textContent = '✓';
+                button.querySelector('.btn-text').textContent = '저장됨';
+            }, 300);
+
+            // 저장 성공 메시지
+            const messages = {
+                global: '전역 메모리에 저장되었습니다.',
+                project: '프로젝트 메모리에 저장되었습니다.',
+                room: '대화방 메모리에 저장되었습니다.',
+                parent: '부모 대화방 메모리에 저장되었습니다.'
+            };
+
+            // 사이버펑크 스타일의 알림 표시
+            const notification = document.createElement('div');
+            notification.className = 'cyber-notification';
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <span class="notification-icon">💾</span>
+                    <span class="notification-text">${messages[type]}</span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+
+            // 알림 자동 제거
+            setTimeout(() => {
+                notification.classList.add('fade-out');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
+
+        // 초기 상태 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            // 부모 대화방 존재 여부 설정 (데모용)
+            const hasParent = Math.random() > 0.5;
+            document.querySelectorAll('.parent').forEach(el => {
+                el.style.display = hasParent ? 'flex' : 'none';
+            });
+
+            // New Chat 버튼 이벤트 핸들러
+            document.getElementById('newChatBtn').addEventListener('click', function() {
+                // 현재 대화 내용 초기화
+                document.querySelector('.chat-messages').innerHTML = '';
+
+                // 코칭 탭 초기화
+                document.querySelector('.coaching-items').style.display = 'none';
+                document.querySelector('.empty-state').style.display = 'block';
+
+                // 코칭 탭 비활성화
+                document.querySelector('.tab-header[data-tab="post-coaching"]').classList.remove('active');
+                document.querySelector('.tab-header[data-tab="pre-coaching"]').classList.add('active');
+                document.querySelector('.tab-content[data-tab="post-coaching"]').style.display = 'none';
+                document.querySelector('.tab-content[data-tab="pre-coaching"]').style.display = 'block';
+
+                // 입력창 초기화
+                document.getElementById('userInput').value = '';
+            });
+
+            // New Sub Chat 버튼 이벤트 핸들러
+            document.getElementById('newSubChatBtn').addEventListener('click', function() {
+                // 현재 대화 내용 초기화
+                document.querySelector('.chat-messages').innerHTML = '';
+
+                // 코칭 탭 초기화
+                document.querySelector('.coaching-items').style.display = 'none';
+                document.querySelector('.empty-state').style.display = 'block';
+
+                // 코칭 탭 비활성화
+                document.querySelector('.tab-header[data-tab="post-coaching"]').classList.remove('active');
+                document.querySelector('.tab-header[data-tab="pre-coaching"]').classList.add('active');
+                document.querySelector('.tab-content[data-tab="post-coaching"]').style.display = 'none';
+                document.querySelector('.tab-content[data-tab="pre-coaching"]').style.display = 'block';
+
+                // 입력창 초기화
+                document.getElementById('userInput').value = '';
+            });
+        });
+
+        // 질문 전송 후 상태 업데이트
+        function updateQuestionState(button) {
+            const questionContainer = button.closest('.optimized-question');
+            questionContainer.classList.add('sent');
+
+            // 모든 버튼 비활성화
+            const buttons = questionContainer.querySelectorAll('.question-actions button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('used');
+            });
+
+            // 사용된 버튼 강조
+            button.classList.add('used');
+        }
+
+        // 수정된 질문 사용
+        function useOptimizedQuestion(button) {
+            const questionText = button.closest('.optimized-question').querySelector('.question-text').textContent;
+            document.querySelector('.chat-input').value = questionText;
+            updateQuestionState(button);
+        }
+
+        // 직접 수정하기
+        function editQuestion(button) {
+            const questionText = button.closest('.optimized-question').querySelector('.question-text').textContent;
+            document.querySelector('.chat-input').value = questionText;
+            document.querySelector('.chat-input').focus();
+            updateQuestionState(button);
+        }
+
+        // Insight Map 토글 기능
+        document.querySelector('.toggle-button').addEventListener('click', function() {
+            const panel = document.querySelector('.insight-map-panel');
+            const icon = this.querySelector('i');
+
+            panel.classList.toggle('collapsed');
+            icon.classList.toggle('fa-chevron-up');
+            icon.classList.toggle('fa-chevron-down');
+        });
+
+        // 키워드 배지 선택 기능
+        document.querySelectorAll('.keyword-badge').forEach(badge => {
+            badge.addEventListener('click', function() {
+                // 모든 배지에서 active 클래스 제거
+                document.querySelectorAll('.keyword-badge').forEach(b => b.classList.remove('active'));
+                // 클릭된 배지에 active 클래스 추가
+                this.classList.add('active');
+
+                // 상세 내용 표시
+                const detailContent = document.querySelector('.detail-content');
+                detailContent.classList.add('active');
+            });
+        });
+
+        // 상세 내용 닫기 버튼 클릭 이벤트
+        document.querySelector('.close-detail').addEventListener('click', function() {
+            const detailContent = document.querySelector('.detail-content');
+            detailContent.classList.remove('active');
+            // 모든 배지에서 active 클래스 제거
+            document.querySelectorAll('.keyword-badge').forEach(b => b.classList.remove('active'));
+        });
+    </script>
+</body>
+</html>

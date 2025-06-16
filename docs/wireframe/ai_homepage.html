@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A&I - Ask & Improve</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a1425;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Background Circuit Pattern */
+        .bg-circuit {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 60%, rgba(0, 255, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 150, 255, 0.05) 0%, transparent 50%),
+                linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.03) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Floating Circuit Lines */
+        .circuit-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.4), transparent);
+            height: 2px;
+            animation: circuit-flow 6s infinite;
+        }
+
+        @keyframes circuit-flow {
+            0%, 100% { opacity: 0; transform: translateX(-100%); }
+            50% { opacity: 1; transform: translateX(100%); }
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 0;
+            position: relative;
+            z-index: 100;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-image {
+            height: 40px;
+            width: auto;
+            transition: all 0.3s ease;
+        }
+
+        .logo-image:hover {
+            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #00ffff, #0099ff);
+            color: #0a1425;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 80px 20px;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .hero-text {
+            animation: slideInLeft 1s ease-out;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            color: #00ffff;
+            font-size: 3.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 32px;
+        }
+
+        .hero-description {
+            font-size: 1.2rem;
+            color: #b0c4de;
+            margin-bottom: 40px;
+            line-height: 1.8;
+        }
+
+        .hero-visual {
+            position: relative;
+            animation: slideInRight 1s ease-out;
+        }
+
+        .ai-brain-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .ai-brain-image {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
+            animation: pulse-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 50px rgba(0, 255, 255, 0.3); }
+            100% { box-shadow: 0 0 80px rgba(0, 255, 255, 0.6); }
+        }
+
+        .floating-icons {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .floating-icon {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .floating-icon:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-icon:nth-child(2) { top: 20%; right: 15%; animation-delay: 1s; }
+        .floating-icon:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 2s; }
+        .floating-icon:nth-child(4) { bottom: 10%; right: 10%; animation-delay: 1.5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 120px 20px;
+            position: relative;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: #b0c4de;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: rgba(15, 30, 50, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 0;
+            background: linear-gradient(to bottom, transparent, #00ffff, transparent);
+            transition: height 0.5s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.1);
+        }
+
+        .feature-card:hover::before {
+            height: 100%;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #00ffff;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .feature-description {
+            color: #b0c4de;
+            line-height: 1.6;
+        }
+
+        /* Process Section */
+        .process {
+            padding: 120px 20px;
+            background: rgba(0, 255, 255, 0.02);
+            position: relative;
+        }
+
+        .process-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-top: 80px;
+        }
+
+        .process-step {
+            text-align: center;
+            position: relative;
+        }
+
+        .process-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            top: 50px;
+            right: -20px;
+            font-size: 2rem;
+            color: #00ffff;
+            animation: pulse 2s infinite;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00ffff, #0099ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0a1425;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-number::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00ffff;
+        }
+
+        .step-description {
+            color: #b0c4de;
+            font-size: 0.9rem;
+        }
+
+        /* AI Demo Section */
+        .ai-demo {
+            padding: 120px 20px;
+            position: relative;
+        }
+
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .demo-visual {
+            background: rgba(15, 30, 50, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-visual::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="circuit" patternUnits="userSpaceOnUse" width="20" height="20"><path d="M0 10h20M10 0v20" stroke="%23003366" stroke-width="0.5" fill="none"/><circle cx="10" cy="10" r="1" fill="%23006699"/></pattern></defs><rect width="100" height="100" fill="url(%23circuit)"/></svg>');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .chat-preview {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-message {
+            margin: 15px 0;
+            padding: 15px 20px;
+            border-radius: 15px;
+            max-width: 70%;
+        }
+
+        .chat-message.user {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 150, 255, 0.15));
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .chat-message.ai {
+            background: rgba(15, 30, 50, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            margin-right: auto;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 120px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 150, 255, 0.05));
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #00ffff;
+        }
+
+        .cta-description {
+            font-size: 1.2rem;
+            color: #b0c4de;
+            margin-bottom: 40px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff, #0099ff);
+            color: #0a1425;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 60px 20px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #00ffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #33ffff;
+        }
+
+        .footer-info {
+            color: #b0c4de;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes slideInLeft {
+            0% { opacity: 0; transform: translateX(-50px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            0% { opacity: 0; transform: translateX(50px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 2.8rem;
+            }
+
+            .process-steps {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+
+            .process-step:not(:last-child)::after {
+                content: '↓';
+                top: 100%;
+                right: 50%;
+                transform: translateX(50%);
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-circuit"></div>
+
+    <!-- Floating Circuit Lines -->
+    <div class="circuit-line" style="top: 15%; left: 0; width: 300px; animation-delay: 0s;"></div>
+    <div class="circuit-line" style="top: 35%; right: 0; width: 250px; animation-delay: 2s;"></div>
+    <div class="circuit-line" style="top: 55%; left: 0; width: 400px; animation-delay: 4s;"></div>
+    <div class="circuit-line" style="top: 75%; right: 0; width: 200px; animation-delay: 1s;"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo-container">
+                <img src="https://via.placeholder.com/160x40/0a1425/00ffff?text=A%26I" alt="A&I Logo" class="logo-image"/>
+            </div>
+            <a href="#" class="cta-button">시작하기</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">AI를 더 똑똑하게 쓰는 법,</h1>
+                <h2 class="hero-subtitle">A&I에서 시작하세요</h2>
+                <p class="hero-description">
+                    질문을 개선하고, AI 응답을 체계적으로 관리하며, 개인화된 코칭으로 AI 활용 능력을
+                    향상시키는 스마트한 도구입니다.
+                </p>
+                <a href="#" class="cta-button" style="font-size: 1.2rem; padding: 16px 32px;">
+                    지금 시작하기 →
+                </a>
+            </div>
+            <div class="hero-visual">
+                <div class="ai-brain-container">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDUwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJyYWluR3JhZGllbnQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDBmZmZmO3N0b3Atb3BhY2l0eTowLjgiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDA5OWZmO3N0b3Atb3BhY2l0eTowLjQiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8ZmlsdGVyIGlkPSJnbG93Ij4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMyIgcmVzdWx0PSJjb2xvcmVkQmx1ciIvPgogICAgICA8ZmVNZXJnZT4KICAgICAgICA8ZmVNZXJnZU5vZGUgaW49ImNvbG9yZWRCbHVyIi8+CiAgICAgICAgPGZlTWVyZ2VOb2RlIGluPSJTb3VyY2VHcmFwaGljIi8+CiAgICAgIDwvZmVNZXJnZT4KICAgIDwvZmlsdGVyPgogIDwvZGVmcz4KICA8IS0tIEJhY2tncm91bmQgLS0+CiAgPHJlY3Qgd2lkdGg9IjUwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiMwYTE0MjUiIHJ4PSIyMCIvPgogIDwhLS0gQUkgQnJhaW4gU2lsaG91ZXR0ZSAtLT4KICA8cGF0aCBkPSJNMjUwIDEwMEMzMDAgMTAwIDM0MCAzMCAzNDAgMTAwQzM0MCAyMDAgMzAwIDI5MCAyNTAgMjkwQzIwMCAyOTAgMTYwIDIwMCAxNjAgMTAwQzE2MCAzMCAyMDAgMTAwIDI1MCAxMDAiIGZpbGw9InVybCgjYnJhaW5HcmFkaWVudCkiIGZpbHRlcj0idXJsKCNnbG93KSIvPgogIDwhLS0gTmV1cmFsIE5ldHdvcmsgTGluZXMgLS0+CiAgPGcgc3Ryb2tlPSIjMDBmZmZmIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuNyI+CiAgICA8IS0tIENlbnRyYWwgSHViIC0tPgogICAgPGNpcmNsZSBjeD0iMjUwIiBjeT0iMjAwIiByPSI4IiBmaWxsPSIjMDBmZmZmIi8+CiAgICA8IS0tIE5vZGVzIGFuZCBDb25uZWN0aW9ucyAtLT4KICAgIDxjaXJjbGUgY3g9IjIwMCIgY3k9IjE1MCIgcj0iNiIgZmlsbD0iIzAwZmZmZiIvPgogICAgPGxpbmUgeDE9IjI1MCIgeTE9IjIwMCIgeDI9IjIwMCIgeTI9IjE1MCIvPgogICAgPGNpcmNsZSBjeD0iMzAwIiBjeT0iMTUwIiByPSI2IiBmaWxsPSIjMDBmZmZmIi8+CiAgICA8bGluZSB4MT0iMjUwIiB5MT0iMjAwIiB4Mj0iMzAwIiB5Mj0iMTUwIi8+CiAgICA8Y2lyY2xlIGN4PSIxODAiIGN5PSIyMDAiIHI9IjYiIGZpbGw9IiMwMGZmZmYiLz4KICAgIDxsaW5lIHgxPSIyNTAiIHkxPSIyMDAiIHgyPSIxODAiIHkyPSIyMDAiLz4KICAgIDxjaXJjbGUgY3g9IjMyMCIgY3k9IjIwMCIgcj0iNiIgZmlsbD0iIzAwZmZmZiIvPgogICAgPGxpbmUgeDE9IjI1MCIgeTE9IjIwMCIgeDI9IjMyMCIgeTI9IjIwMCIvPgogICAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMjUwIiByPSI2IiBmaWxsPSIjMDBmZmZmIi8+CiAgICA8bGluZSB4MT0iMjUwIiB5MT0iMjAwIiB4Mj0iMjAwIiB5Mj0iMjUwIi8+CiAgICA8Y2lyY2xlIGN4PSIzMDAiIGN5PSIyNTAiIHI9IjYiIGZpbGw9IiMwMGZmZmYiLz4KICAgIDxsaW5lIHgxPSIyNTAiIHkxPSIyMDAiIHgyPSIzMDAiIHkyPSIyNTAiLz4KICAgIDwhLS0gT3V0ZXIgbm9kZXMgLS0+CiAgICA8Y2lyY2xlIGN4PSIxNDAiIGN5PSIxMzAiIHI9IjQiIGZpbGw9IiMwMGZmZmYiLz4KICAgIDxsaW5lIHgxPSIyMDAiIHkxPSIxNTAiIHgyPSIxNDAiIHkyPSIxMzAiLz4KICAgIDxjaXJjbGUgY3g9IjM2MCIgY3k9IjEzMCIgcj0iNCIgZmlsbD0iIzAwZmZmZiIvPgogICAgPGxpbmUgeDE9IjMwMCIgeTE9IjE1MCIgeDI9IjM2MCIgeTI9IjEzMCIvPgogICAgPGNpcmNsZSBjeD0iMTQwIiBjeT0iMjcwIiByPSI0IiBmaWxsPSIjMDBmZmZmIi8+CiAgICA8bGluZSB4MT0iMjAwIiB5MT0iMjUwIiB4Mj0iMTQwIiB5Mj0iMjcwIi8+CiAgICA8Y2lyY2xlIGN4PSIzNjAiIGN5PSIyNzAiIHI9IjQiIGZpbGw9IiMwMGZmZmYiLz4KICAgIDxsaW5lIHgxPSIzMDAiIHkxPSIyNTAiIHgyPSIzNjAiIHkyPSIyNzAiLz4KICA8L2c+CiAgPCEtLSBEYXRhIEZsb3cgUGFydGljbGVzIC0tPgogIDxjaXJjbGUgY3g9IjEwMCIgY3k9IjIwMCIgcj0iMyIgZmlsbD0iIzAwZmZmZiIgb3BhY2l0eT0iMC44Ij4KICAgIDxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9ImN4IiB2YWx1ZXM9IjEwMDs0MDA7MTAwIiBkdXI9IjRzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogIDwvY2lyY2xlPgogIDxjaXJjbGUgY3g9IjQwMCIgY3k9IjE1MCIgcj0iMyIgZmlsbD0iIzAwZmZmZiIgb3BhY2l0eT0iMC44Ij4KICAgIDxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9ImN4IiB2YWx1ZXM9IjQwMDsxMDA7NDAwIiBkdXI9IjVzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogIDwvY2lyY2xlPgogIDxjaXJjbGUgY3g9IjEwMCIgY3k9IjI1MCIgcj0iMyIgZmlsbD0iIzAwZmZmZiIgb3BhY2l0eT0iMC44Ij4KICAgIDxhbmltYXRlIGF0dHJpYnV0ZU5hbWU9ImN4IiB2YWx1ZXM9IjEwMDs0MDA7MTAwIiBkdXI9IjZzIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIvPgogIDwvY2lyY2xlPgogIDwhLS0gVGV4dCAtLT4KICA8dGV4dCB4PSIyNTAiIHk9IjM1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwZmZmZiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iYm9sZCI+U21hcnQgQUkgQnJhaW48L3RleHQ+Cjwvc3ZnPg==" alt="AI Brain" class="ai-brain-image"/>
+                    <div class="floating-icons">
+                        <div class="floating-icon">🧠</div>
+                        <div class="floating-icon">⚡</div>
+                        <div class="floating-icon">🎯</div>
+                        <div class="floating-icon">✨</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-header">
+            <h2 class="section-title">핵심 기능</h2>
+            <p class="section-subtitle">
+                A&I만의 특별한 기능들로 AI 활용 능력을 한 단계 끌어올리세요
+            </p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3 class="feature-title">Insight Map</h3>
+                <p class="feature-description">
+                    대화 내용을 키워드와 요약으로 시각화하여 지식을 체계적으로 관리합니다.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">질문 코칭</h3>
+                <p class="feature-description">
+                    질문을 분석하고 더 효과적인 질문으로 개선하는 개인화된 코칭을 제공합니다.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">다중 응답 비교</h3>
+                <p class="feature-description">
+                    여러 AI 모델의 응답을 탭으로 비교하여 최적의 답변을 찾을 수 있습니다.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title">응답 후 코칭</h3>
+                <p class="feature-description">
+                    AI 응답을 요약하고 관련 질문을 추천하여 지식을 확장해나갈 수 있습니다.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="process">
+        <div class="process-container">
+            <div class="features-header">
+                <h2 class="section-title">사용 흐름</h2>
+                <p class="section-subtitle">
+                    간단한 4단계로 AI 활용 전문가가 되어보세요
+                </p>
+            </div>
+            <div class="process-steps">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">질문 입력</h3>
+                    <p class="step-description">궁금한 것을 자유롭게 질문</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">질문 개선</h3>
+                    <p class="step-description">AI가 더 나은 질문으로 코칭</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">응답 받기</h3>
+                    <p class="step-description">개선된 질문으로 정확한 답변 획득</p>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">학습 확장</h3>
+                    <p class="step-description">요약과 추가 질문으로 지식 확장</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Demo Section -->
+    <section class="ai-demo">
+        <div class="demo-container">
+            <div class="features-header">
+                <h2 class="section-title">실제 사용 예시</h2>
+                <p class="section-subtitle">
+                    A&I가 어떻게 질문을 개선하고 학습을 도와주는지 확인해보세요
+                </p>
+            </div>
+            <div class="demo-visual">
+                <div class="chat-preview">
+                    <div class="chat-message user">
+                        원래 질문: "머신러닝이 뭐야?"
+                    </div>
+                    <div class="chat-message ai">
+                        <strong>🎯 질문 코칭:</strong><br>
+                        <strong>개선된 질문:</strong> "머신러닝의 기본 개념과 주요 알고리즘 유형, 그리고 실제 활용 사례를 초보자도 이해할 수 있게 설명해주세요."<br><br>
+                        <strong>📝 응답 요약:</strong> 머신러닝은 데이터를 통해 패턴을 학습하는 AI 기술로, 지도학습, 비지도학습, 강화학습으로 구분됩니다.<br><br>
+                        <strong>💡 추천 질문:</strong><br>
+                        • 머신러닝과 딥러닝의 차이점은?<br>
+                        • 실제 프로젝트에서 어떤 알고리즘을 선택해야 할까요?
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2 class="cta-title">시작하기</h2>
+            <p class="cta-description">
+                OpenAI 또는 Claude API 키를 등록하고 바로 시작할 수 있습니다.
+            </p>
+            <div class="cta-buttons">
+                <a href="#" class="btn-primary">지금 시작하기</a>
+                <a href="#" class="btn-secondary">API 키 등록하기</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/nodit-developers/Lambda_Hackathon_2025" target="_blank">GitHub</a>
+                <a href="mailto:Richard@lambda256.io">개발자 문의</a>
+                <a href="#">사용 가이드</a>
+            </div>
+            <div class="footer-info">
+                <p><strong>Lambda Hackathon 2025</strong></p>
+                <p>개발자: Richard (richard@lambda256.io)</p>
+                <p>© 2025 A&I. AI를 더 똑똑하게 사용하는 방법을 제공합니다.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add intersection observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Parallax effect for circuit lines
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const circuits = document.querySelectorAll('.circuit-line');
+            circuits.forEach((circuit, index) => {
+                const speed = (index + 1) * 0.5;
+                circuit.style.transform = `translateX(${scrolled * speed * 0.1}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
