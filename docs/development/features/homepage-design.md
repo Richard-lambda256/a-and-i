@@ -102,7 +102,7 @@ extend: {
 </Button>
 ```
 
-- SF UI 효과 팁: backdrop-blur-sm + bg-opacity-20(글래스), border-dashed + animate-pulse(HUD), ring-2 ring-[var(--ring)](인터랙션), motion-safe:animate-glow(네온 애니메이션)
+- SF UI 효과 팁: border-dashed + animate-pulse(HUD), ring-2 ring-[var(--ring)](인터랙션), motion-safe:animate-glow(네온 애니메이션)
 
 ## 4. 프롬프트 및 AI API 호출 정책
 
@@ -234,7 +234,7 @@ extend: {
 </Button>
 ```
 
-- SF UI 효과 팁: backdrop-blur-sm + bg-opacity-20(글래스), border-dashed + animate-pulse(HUD), ring-2 ring-[var(--ring)](인터랙션), motion-safe:animate-glow(네온 애니메이션)
+- SF UI 효과 팁: border-dashed + animate-pulse(HUD), ring-2 ring-[var(--ring)](인터랙션), motion-safe:animate-glow(네온 애니메이션)
 
 ## 5. 홈페이지(`/`) 기획
 

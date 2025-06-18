@@ -170,26 +170,22 @@
 - **Request Body**:
   ```json
   {
-    "user_question": "User Question",
-    "context": {
-      "globalMemories": [],
-      "projectMemories": [],
-      "chatHistory": []
-    }
+    "userQuestion": "User Question"
   }
   ```
 - **Response**:
   ```json
   {
     "id": "uuid",
-    "chatroom_id": "chatroom-uuid",
-    "user_question": "User Question",
-    "ai_response": "AI Response",
-    "pre_coaching_result": {},
-    "post_coaching_result": {},
-    "state": "NEW",
-    "created_at": "2023-01-01T00:00:00Z",
-    "updated_at": "2023-01-01T00:00:00Z"
+    "chatroomId": "chatroom-uuid",
+    "userQuestion": "User Question",
+    "usedQuestion": "User Question",
+    "aiResponse": "",
+    "preCoachingResult": null,
+    "postCoachingResult": null,
+    "state": "new",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "updatedAt": "2023-01-01T00:00:00Z"
   }
   ```
 
@@ -200,38 +196,44 @@
   ```json
   {
     "id": "uuid",
-    "chatroom_id": "chatroom-uuid",
-    "user_question": "User Question",
-    "ai_response": "AI Response",
-    "pre_coaching_result": {},
-    "post_coaching_result": {},
-    "state": "NEW",
-    "created_at": "2023-01-01T00:00:00Z",
-    "updated_at": "2023-01-01T00:00:00Z"
+    "chatroomId": "chatroom-uuid",
+    "userQuestion": "User Question",
+    "usedQuestion": "Used Question",
+    "aiResponse": "AI Response",
+    "preCoachingResult": {},
+    "postCoachingResult": {},
+    "state": "asked",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "updatedAt": "2023-01-01T00:00:00Z"
   }
   ```
 
 #### Update Conversation
-- **Endpoint**: `PUT /api/conversations/:id`
+- **Endpoint**: `PATCH /api/conversations/:id`
 - **Description**: 특정 대화의 정보를 업데이트합니다.
 - **Request Body**:
   ```json
   {
-    "state": "PRE_COACHING_COMPLETE"
+    "state": "preCoached",
+    "usedQuestion": "Updated Question",
+    "aiResponse": "AI Response",
+    "preCoachingResult": {},
+    "postCoachingResult": {}
   }
   ```
 - **Response**:
   ```json
   {
     "id": "uuid",
-    "chatroom_id": "chatroom-uuid",
-    "user_question": "User Question",
-    "ai_response": "AI Response",
-    "pre_coaching_result": {},
-    "post_coaching_result": {},
-    "state": "PRE_COACHING_COMPLETE",
-    "created_at": "2023-01-01T00:00:00Z",
-    "updated_at": "2023-01-01T00:00:00Z"
+    "chatroomId": "chatroom-uuid",
+    "userQuestion": "User Question",
+    "usedQuestion": "Updated Question",
+    "aiResponse": "AI Response",
+    "preCoachingResult": {},
+    "postCoachingResult": {},
+    "state": "preCoached",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "updatedAt": "2023-01-01T00:00:00Z"
   }
   ```
 
@@ -264,7 +266,12 @@
 - **Response**:
   ```json
   {
-    "coaching_result": {}
+    "coaching_result": {
+      "tags": ["keyword1", "keyword2"],
+      "summary": "Question summary",
+      "suggested_context": "Suggested context",
+      "recommended_question": "Recommended question"
+    }
   }
   ```
 
@@ -275,7 +282,7 @@
   ```json
   {
     "question": "User Question",
-    "answer": "AI Response",
+    "response": "AI Response",
     "context": {
       "globalMemories": [],
       "projectMemories": [],
@@ -286,9 +293,39 @@
 - **Response**:
   ```json
   {
-    "coaching_result": {}
+    "coaching_result": {
+      "analysis": "Response analysis",
+      "suggestions": ["suggestion1", "suggestion2"],
+      "next_steps": ["step1", "step2"]
+    }
   }
   ```
+
+#### 실제 질문 (AI Ask)
+- **Endpoint**: `POST /api/ai/ask`
+- **Description**: AI 질문 실행
+- **Request Body**:
+  ```json
+  {
+    "question": "User Question",
+    "context": {
+      "globalMemories": [],
+      "projectMemories": [],
+      "chatHistory": []
+    }
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "answer": "AI Response"
+  }
+  ```
+
+### UX Flow (2024-06 기준)
+1. 사용자가 'Coaching' 버튼을 누르면 `/api/coaching/pre` 호출 → 추천 질문 표시
+2. 사용자가 추천 질문을 선택하거나 직접 질문을 확정하면 `/api/ai/ask` 호출 → 답변 수신 후 `/api/coaching/post` 호출
+3. 후코칭 결과를 패널에 표시
 
 ### 6. Memory Management
 

@@ -23,7 +23,17 @@
 - 위와 같이 context를 쌓아서 LLM(Gemini 등)에 전달
 - 모든 코칭/AI질문/후코칭 API는 context를 body에 포함해 호출
 
-### API 호출 흐름 예시
+### API 호출 UX 흐름 (2024-06 리팩토링 기준)
+
+1. **Coaching 버튼 클릭**
+    - `/api/coaching/pre` 호출 (body: `{ question, context }`)
+    - 추천 질문 목록을 패널에 표시
+2. **사용자가 추천 질문을 선택하거나 직접 질문을 확정**
+    - `/api/ai/ask` 호출 (body: `{ question, context }`)
+    - AI 답변을 받은 후 `/api/coaching/post` 호출 (body: `{ question, answer, context }`)
+    - 후코칭 분석 결과를 패널에 표시
+
+#### API 호출 예시
 ```ts
 // 대화전 코칭
 POST /api/coaching/pre
@@ -40,26 +50,26 @@ body: { question, answer, context: { globalMemories, projectMemories, chatHistor
 
 - context 관리 및 프롬프트 구성은 Claude, Gemini, GPT 등 모든 LLM에서 베스트 프랙티스임을 명시
 
-## 질문 전 코칭 (Pre-Coaching)
+## 질문 전 코칭 (Pre)
 
-### 1. 핵심 키워드 추출
+### 1. 키워드+카테고리 태그 추출
 ```
-당신은 AI 학습 코치입니다. 사용자의 질문에서 핵심 키워드를 추출해주세요.
+당신은 AI 학습 코치입니다. 사용자의 질문에서 핵심 키워드와 카테고리를 추출해주세요.
 
 출력 형식:
-- 키워드 태그 목록 (최대 5개)
-- 각 키워드의 중요도 (1-5)
-- 키워드 간의 관계 설명
+- 키워드+카테고리 태그 목록 (최대 5개, 예: React[Library], useEffect[Hook])
+- 각 태그의 중요도 (1-5)
+- 키워드/카테고리 간의 관계 설명
 
 예시:
 질문: "React useEffect Hook에서 의존성 배열과 클린업 함수를 어떻게 사용해야 할까요?"
 
-키워드:
-- React (5)
-- useEffect (5)
-- 의존성 배열 (4)
-- 클린업 함수 (4)
-- Hook (3)
+키워드+카테고리:
+- React [Library] (5)
+- useEffect [Hook] (5)
+- 의존성 배열 [Concept] (4)
+- 클린업 함수 [Concept] (4)
+- Hook [API] (3)
 
 관계: React의 useEffect Hook에서 의존성 배열과 클린업 함수는 메모리 관리와 사이드 이펙트 제어에 중요한 요소입니다.
 ```
@@ -79,19 +89,15 @@ body: { question, answer, context: { globalMemories, projectMemories, chatHistor
 요청 사항: 의존성 배열과 클린업 함수를 효과적으로 사용하는 방법과 best practice
 ```
 
-### 3. 카테고리 분류 및 목적 재정의
+### 3. 목적 및 기대 효과
 ```
-질문의 카테고리를 분류하고 목적을 명확히 정의해주세요.
+질문의 목적과 예상되는 학습 결과를 명확히 정의해주세요.
 
 출력 형식:
-- 주 카테고리
-- 세부 카테고리
 - 학습 목적
 - 예상되는 학습 결과
 
 예시:
-주 카테고리: React
-세부 카테고리: Hooks, Best Practices
 학습 목적: useEffect Hook의 고급 사용법 습득
 예상 결과: 메모리 누수 없는 비동기 작업 처리 구현 능력 향상
 ```
@@ -140,9 +146,9 @@ body: { question, answer, context: { globalMemories, projectMemories, chatHistor
 
 입력:
 - 원본 질문
-- 추출된 키워드
+- 추출된 키워드+카테고리 태그
 - 질문 요약
-- 카테고리와 목적
+- 목적 및 기대 효과
 - 맥락 제안
 - 범위 최적화
 
@@ -161,7 +167,7 @@ body: { question, answer, context: { globalMemories, projectMemories, chatHistor
 - 실무 적용 가능성 강화
 ```
 
-## 질문 후 코칭 (Post-Coaching)
+## 질문 후 코칭 (Post)
 
 ### 1. 답변 분석
 ```
@@ -441,3 +447,34 @@ AI의 답변을 분석하고 학습 포인트를 추출해주세요.
     "improvement_summary": "프로젝트의 실제 사례와 전역적인 최적화 패턴을 연계하여 질문을 구체화했습니다. 특히 현재 발생 중인 성능 이슈에 초점을 맞추어 실용적인 해결책을 얻을 수 있도록 질문을 구성했습니다."
 }
 ```
+
+# 대화 상태별 메인 패널 UX 정책 (2024-06)
+
+## 대화 상태
+- `new`: 질문 입력 전 또는 최초 입력 상태
+- `preCoached`: Pre-Coaching(질문 전 코칭) 완료, AI 질문 전 상태
+- `asked`: 실제 AI 질문/응답까지 완료된 상태
+
+## 상태별 메인 대화 패널 동작
+
+### 1. new 상태
+- 상단 대화 출력 공간에: **"질문을 입력하고 코칭을 요청하세요."** 안내 출력
+- 하단: 사용자 입력창 + **COACHING** 버튼 활성화
+- COACHING 버튼 클릭 시 입력값이 있으면 `/api/coaching/pre` 호출
+
+### 2. preCoached 상태
+- 상단: 사용자가 입력한 질문 표시
+- 질문 아래: **Pre-Coaching 패널의 코칭 내용을 확인하고 AI에게 질문을 완료하세요.** 안내 출력
+- Pre-Coaching 패널(코칭 결과) 표시
+- 하단: 사용자 입력창 + **COACHING** 버튼 활성화
+- COACHING 버튼 클릭 시 입력이 변경되었다면 `/api/coaching/pre` 재호출
+
+### 3. asked 상태
+- 상단: 사용자가 입력했던 질문(흐리게) + 실제 Pre-Coaching에서 사용한 질문 표시
+- 그 아래: AI 응답(Markdown Viewer 등) 표시
+- Pre/Post-Coaching 패널 표시(필요시)
+- 하단: 사용자 입력창은 **readonly**, COACHING 버튼은 **disabled**
+
+---
+
+이 정책에 따라 FE/컴포넌트/화면/UX를 구현한다.

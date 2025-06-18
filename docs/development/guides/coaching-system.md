@@ -19,22 +19,7 @@
 ```typescript
 interface IPreCoachingProps {
   userQuestion: string;
-  contexts: {
-    globalMemory: IMemory[];
-    projectMemory: IMemory[];
-    parentContexts: {
-      roomMemory: IMemory[];
-      chatHistory: IChat[];
-      parentContexts?: {
-        roomMemory: IMemory[];
-        chatHistory: IChat[];
-        parentContexts?: {
-          // 재귀적 구조
-        };
-      };
-    };
-    currentChatHistory: IChat[];
-  };
+  contexts: IContexts;
   onQuestionUpdate: (question: string) => void;
 }
 
@@ -47,24 +32,14 @@ const PreCoaching: React.FC<IPreCoachingProps> = ({
 };
 ```
 
-### 2.2 Context 기반 질문 추천
+### 2.2 키워드+카테고리 태그 추출
 ```typescript
-interface IQuestionRecommendation {
-  question: string;
-  reason: string;
-  usedContexts: {
-    type: string;
-    id: string;
-    relevance: number;
-    depth?: number; // 부모 컨텍스트의 깊이
-  }[];
-  expectedBenefits: string[];
+interface IKeywordTag {
+  tag: string; // 예: 'React[Library]'
+  importance: number;
 }
 
-const useQuestionRecommendation = (
-  question: string,
-  contexts: IContexts
-): IQuestionRecommendation[] => {
+const extractKeywordTags = (question: string): IKeywordTag[] => {
   // 구현
 };
 ```
