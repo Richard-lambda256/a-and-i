@@ -19,7 +19,7 @@ function GameLoading() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-sciFiBg to-sciFiBg/80 z-50">
       <div className="flex flex-col items-center gap-6">
-        <div className="text-3xl font-bold text-[var(--primary)] neon-glow animate-pulse mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+        <div className="text-2xl font-bold text-[var(--primary)] neon-glow animate-pulse mb-2 rounded-xl bg-[var(--background)]/80 px-8 py-4 shadow-neon" style={{ fontFamily: 'Orbitron, sans-serif' }}>
           LOADING...
         </div>
         <div className="w-64 h-4 bg-[var(--border)] rounded-full overflow-hidden shadow-lg">

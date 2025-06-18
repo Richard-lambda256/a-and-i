@@ -9,31 +9,31 @@
 
 @layer base {
   :root {
-    --background: #0a0f1c;
-    --foreground: #e0f7ff;
-    --primary: #00f6ff;
-    --primary-foreground: #0a0f1c;
+    --background: #0a1425;
+    --foreground: #ffffff;
+    --primary: #00ffff;
+    --primary-foreground: #0a1425;
     --secondary: #ff0088;
-    --secondary-foreground: #0a0f1c;
+    --secondary-foreground: #0a1425;
     --accent: #00ff9f;
-    --accent-foreground: #0a0f1c;
+    --accent-foreground: #0a1425;
     --muted: #1f2733;
-    --muted-foreground: #6c829b;
+    --muted-foreground: #b0c4de;
     --border: #1e2a3a;
     --input: #2c3e50;
-    --ring: #00f6ff;
+    --ring: #00ffff;
     --destructive: #ff0055;
     --destructive-foreground: #ffffff;
-    --card: #0a0f1c;
-    --card-foreground: #e0f7ff;
-    --popover: #0a0f1c;
-    --popover-foreground: #e0f7ff;
+    --card: #0a1425;
+    --card-foreground: #ffffff;
+    --popover: #0a1425;
+    --popover-foreground: #ffffff;
   }
 }
 
 @layer base {
   body {
-    @apply bg-[var(--background)] text-[var(--foreground)] font-[Orbitron];
+    @apply bg-[var(--background)] text-[var(--foreground)] font-sans;
   }
 }
 
@@ -48,6 +48,75 @@
 
   .neon-glow {
     @apply shadow-neon motion-safe:animate-glow;
+  }
+
+  .bg-circuit {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 60%, rgba(0, 255, 255, 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(0, 150, 255, 0.05) 0%, transparent 50%),
+      linear-gradient(90deg, transparent 0%, rgba(0, 255, 255, 0.03) 50%, transparent 100%);
+  }
+
+  .circuit-line {
+    @apply absolute bg-gradient-to-r from-transparent via-[rgba(0,255,255,0.4)] to-transparent h-[2px];
+    animation: circuit-flow 6s infinite;
+  }
+
+  @keyframes circuit-flow {
+    0%, 100% { opacity: 0; transform: translateX(-100%); }
+    50% { opacity: 1; transform: translateX(100%); }
+  }
+
+  .hero-title {
+    @apply text-4xl font-bold mb-6;
+    animation: slideInLeft 1s ease-out;
+  }
+
+  .hero-subtitle {
+    @apply text-[var(--primary)] text-5xl font-bold mb-8;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    animation: slideInLeft 1s ease-out;
+  }
+
+  .hero-description {
+    @apply text-xl text-[var(--muted-foreground)] mb-10 leading-relaxed;
+    animation: slideInLeft 1s ease-out;
+  }
+
+  .feature-card {
+    @apply bg-[rgba(15,30,50,0.8)] border border-[rgba(0,255,255,0.2)] rounded-xl p-8 text-center transition-all duration-300 relative overflow-hidden backdrop-blur-md;
+  }
+
+  .feature-card:hover {
+    @apply transform -translate-y-2 border-[rgba(0,255,255,0.5)] shadow-[0_20px_40px_rgba(0,255,255,0.1)];
+  }
+
+  .feature-icon {
+    @apply text-5xl mb-5 text-[var(--primary)];
+  }
+
+  .feature-title {
+    @apply text-xl font-bold mb-4;
+  }
+
+  .feature-description {
+    @apply text-[var(--muted-foreground)] leading-relaxed;
+  }
+
+  @keyframes slideInLeft {
+    0% { opacity: 0; transform: translateX(-50px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes slideInRight {
+    0% { opacity: 0; transform: translateX(50px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
   }
 }
 

@@ -18,8 +18,8 @@ module.exports = {
         sciFiBg: '#0a0f1c',
       },
       boxShadow: {
-        neon: '0 0 8px #00f6ff, 0 0 16px #00f6ff',
-        neonInset: 'inset 0 0 8px #00f6ff',
+        neon: '0 0 4px rgba(0, 246, 255, 0.4), 0 0 8px rgba(0, 246, 255, 0.3)',
+        neonInset: 'inset 0 0 4px rgba(0, 246, 255, 0.3)',
       },
       fontFamily: {
         hud: ['Orbitron', 'sans-serif'],
