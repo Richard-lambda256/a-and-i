@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCoachingStore } from '@/lib/store/coaching-store';
-import { useProjectStore } from '@/lib/store/project-store';
+import { useProjectStore, Conversation } from '@/lib/store/project-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { GlobeIcon, BookmarkIcon } from '@radix-ui/react-icons';
 import { toast } from 'sonner';
+
+interface CoachingPanelProps {
+  preCoachingResult: any;
+  conversation: Conversation | null;
+  onConfirmQuestion: (question: string) => void;
+}
 
 function RecommendationCard({ recommendation, isSelected, onSelect }: {
   recommendation: {
@@ -157,6 +163,7 @@ function ImpactAnalysisCard({ analysis }: { analysis: any }) {
 export function CoachingPanel({
   preCoachingResult,
   conversation,
+  onConfirmQuestion,
 }: CoachingPanelProps) {
   const {
     postCoaching,
@@ -329,8 +336,14 @@ export function CoachingPanel({
                       <Button
                         variant="outline"
                         className="w-full mb-4 border-[var(--primary)] focus-visible:ring-[var(--primary)] focus-visible:border-[var(--primary)]"
-                        onClick={() => onConfirmQuestion(preCoachingResult?.optimized_question || '')}
-                        disabled={isAsked}
+                        onClick={() => {
+                          if (!preCoachingResult?.optimized_question) {
+                            toast.error('최적화된 질문이 없습니다.');
+                            return;
+                          }
+                          onConfirmQuestion(preCoachingResult.optimized_question);
+                        }}
+                        disabled={isAsked || !preCoachingResult?.optimized_question}
                       >
                         최적화 질문으로 대화하기
                       </Button>

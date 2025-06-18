@@ -70,10 +70,20 @@ export default function ChatPage() {
   }
 
   useEffect(() => {
-    fetchKey().then(() => {
-      if (!key) setApiKey(null);
-    }).finally(() => setLoading(false));
-  }, [fetchKey, key, setApiKey]);
+    const initializeKey = async () => {
+      await fetchKey();
+      setLoading(false);
+    };
+    initializeKey();
+  }, []);
+
+  useEffect(() => {
+    if (key) {
+      setApiKey(key);
+    } else {
+      setApiKey(null);
+    }
+  }, [key, setApiKey]);
 
   useEffect(() => {
     if (!loading && !apiKey) {
