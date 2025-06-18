@@ -23,8 +23,8 @@ export interface Conversation {
   userQuestion: string;
   usedQuestion: string;
   aiResponse: string;
-  preCoachingResult?: any;
-  postCoachingResult?: any;
+  preCoachingResult?: unknown;
+  postCoachingResult?: unknown;
   state: 'new' | 'preCoached' | 'asked';
   savedToGlobal: boolean;
   savedToProject: boolean;
@@ -39,10 +39,10 @@ interface ProjectState {
   selectedProject: Project | null;
   selectedChatroom: Chatroom | null;
   selectedConversation: Conversation | null;
-  preCoachingResult: any | null;
+  preCoachingResult: unknown | null;
   apiKey: string | null;
   setApiKey: (key: string | null) => void;
-  setPreCoachingResult: (result: any | null) => void;
+  setPreCoachingResult: (result: unknown | null) => void;
   setProjects: (projects: Project[]) => void;
   setChatrooms: (chatrooms: Chatroom[]) => void;
   setConversations: (conversations: Conversation[]) => void;
@@ -184,11 +184,18 @@ export const useProjectStore = create<ProjectState>()(
           });
           if (!response.ok) throw new Error('Failed to update conversation');
           const updatedConversation = await response.json();
-          set((state) => ({
-            conversations: state.conversations.map((c) =>
+
+          // conversations 배열과 selectedConversation 모두 업데이트
+          set((state) => {
+            const updatedConversations = state.conversations.map((c) =>
               c.id === id ? updatedConversation : c
-            ),
-          }));
+            );
+            return {
+              conversations: updatedConversations,
+              selectedConversation: state.selectedConversation?.id === id ? updatedConversation : state.selectedConversation,
+            };
+          });
+
           return updatedConversation;
         } catch (error) {
           console.error('Error updating conversation:', error);

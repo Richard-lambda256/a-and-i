@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { initializeDefaultPrompts } from '@/lib/prompts';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     await initializeDefaultPrompts();
     return NextResponse.json({ message: '프롬프트가 초기화되었습니다.' });

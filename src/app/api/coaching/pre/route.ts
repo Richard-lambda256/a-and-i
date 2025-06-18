@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
-import { getActivePrompt, applyContext, formatMemories, formatChatHistory } from '@/lib/prompts';
 import { PRE_COACHING_PROMPT } from '@/prompts/pre-coaching-prompt';
 
 interface PreCoachingResponse {

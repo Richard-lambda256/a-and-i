@@ -1,11 +1,11 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest, { params }: any) {
   try {
-    const projectId = request.headers.get('x-project-id');
+    const { projectId } = params;
     if (!projectId) {
-      return new Response('Project ID is required', { status: 400 });
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
     const memories = await prisma.projectMemory.findMany({
@@ -17,23 +17,23 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return Response.json(memories);
+    return NextResponse.json(memories);
   } catch (error) {
     console.error('Error fetching project memories:', error);
-    return new Response('Error fetching project memories', { status: 500 });
+    return NextResponse.json({ error: 'Error fetching project memories' }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, { params }: any) {
   try {
-    const projectId = request.headers.get('x-project-id');
+    const { projectId } = params;
     if (!projectId) {
-      return new Response('Project ID is required', { status: 400 });
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
     }
 
     const { content } = await request.json();
     if (!content) {
-      return new Response('Content is required', { status: 400 });
+      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
     const memory = await prisma.projectMemory.create({
@@ -43,9 +43,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return Response.json(memory);
+    return NextResponse.json(memory);
   } catch (error) {
     console.error('Error creating project memory:', error);
-    return new Response('Error creating project memory', { status: 500 });
+    return NextResponse.json({ error: 'Error creating project memory' }, { status: 500 });
   }
 }

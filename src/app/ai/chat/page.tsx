@@ -50,22 +50,15 @@ export default function ChatPage() {
   const { apiKey } = useProjectStore();
   const { fetchKey } = useApiKeyStore();
   const [loading, setLoading] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [showCoaching, setShowCoaching] = useState(false);
-  const [coachingActive, setCoachingActive] = useState(false);
 
   const {
-    projects,
-    chatrooms,
-    conversations,
     selectedProject,
     selectedChatroom,
     selectedConversation,
     setSelectedConversation,
   } = useProjectStore();
 
-  let breadcrumb: string[] = [];
+  const breadcrumb: string[] = [];
   if (selectedProject) {
     breadcrumb.push(selectedProject.name);
     if (selectedChatroom) {
@@ -86,25 +79,6 @@ export default function ChatPage() {
     }
   }, [loading, apiKey, router]);
 
-  const buildContext = (
-    projectId: string | null,
-    chatroomId: string,
-    conversations: any[],
-    projects: any[],
-    chatrooms: any[]
-  ) => {
-    const project = projects.find((p) => p.id === projectId);
-    const chatroom = chatrooms.find((c) => c.id === chatroomId);
-    return {
-      globalMemory: ['React란 무엇인가?', '상태 관리란 무엇인가?'],
-      projectMemory: project ? [project.guideline || ''] : [],
-      projectGuidelines: project?.guideline || '',
-      previousConversations: chatroom
-        ? conversations.filter((c) => c.chatroomId === chatroom.id)
-        : [],
-    };
-  };
-
   const handleConfirmQuestion = async (question: string) => {
     if (!question.trim() || !selectedChatroom) return;
     if (!selectedProject?.id) {
@@ -115,7 +89,6 @@ export default function ChatPage() {
       alert('API Key가 필요합니다. API Key 관리 페이지에서 설정해주세요.');
       return;
     }
-    setIsLoading(true);
     try {
       const response = await fetch('/api/ai/ask', {
         method: 'POST',
@@ -145,14 +118,8 @@ export default function ChatPage() {
         });
         setSelectedConversation(updated);
       }
-
-      setMessage('');
-      setShowCoaching(false);
-      setCoachingActive(false);
     } catch (error) {
       console.error('Error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -163,7 +130,14 @@ export default function ChatPage() {
     <div className="flex flex-col h-screen">
       <div className="flex items-center h-20 border-b border-[var(--border)] bg-[var(--background)]/95 px-6 gap-4">
         <div className="flex items-center justify-center w-64 h-full">
-          <Image src="/logo.png" alt="A&I Logo" width={120} height={48} priority />
+          <Image
+            src="/logo.png"
+            alt="A&I Logo"
+            width={120}
+            height={40}
+            style={{ width: 'auto', height: 'auto' }}
+            priority
+          />
         </div>
         <div className="flex-1 flex items-center justify-center h-full">
           <div className="flex items-center gap-1 text-base text-[var(--muted-foreground)] select-none">
@@ -185,7 +159,7 @@ export default function ChatPage() {
         </div>
       </div>
       <div className="flex flex-1 min-h-0 h-full">
-        <div className="w-64 border-r h-full flex flex-col">
+        <div className="w-[350px] border-r h-full flex flex-col">
           <ChatExplorer />
         </div>
         <div className="flex-[6] h-full">

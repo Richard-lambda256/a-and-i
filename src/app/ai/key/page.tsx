@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card';
 
 export default function APIKeyPage() {
   const router = useRouter();
-  const { key, keyId, hasKey, setKey, fetchKey, updateKey } = useApiKeyStore();
+  const { key, setKey, fetchKey, updateKey } = useApiKeyStore();
   const [inputKey, setInputKey] = useState(key || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

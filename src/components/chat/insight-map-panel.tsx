@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useProjectStore } from '@/lib/store/project-store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -30,7 +30,7 @@ export function InsightMapPanel() {
   const [projectMemories, setProjectMemories] = useState<Memory[]>([]);
   const [previousConversations, setPreviousConversations] = useState<Conversation[]>([]);
 
-  const fetchMemories = async () => {
+  const fetchMemories = useCallback(async () => {
     try {
       // 전역 메모리 조회
       const globalResponse = await fetch('/api/memories/global');
@@ -50,7 +50,7 @@ export function InsightMapPanel() {
     } catch (error) {
       console.error('Error fetching memories:', error);
     }
-  };
+  }, [selectedProject]);
 
   // 메모리 새로고침 이벤트 리스너
   useEffect(() => {
@@ -62,11 +62,11 @@ export function InsightMapPanel() {
     return () => {
       window.removeEventListener('refreshMemories', handleRefreshMemories);
     };
-  }, [selectedProject]);
+  }, [fetchMemories]);
 
   useEffect(() => {
     fetchMemories();
-  }, [selectedProject]);
+  }, [fetchMemories]);
 
   useEffect(() => {
     if (selectedConversation) {

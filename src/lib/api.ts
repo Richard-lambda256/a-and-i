@@ -3,7 +3,7 @@
 /**
  * 대화 업데이트
  */
-export const updateConversation = async (id: string, data: any) => {
+export const updateConversation = async (id: string, data: unknown) => {
   const response = await fetch(`/api/conversations/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },

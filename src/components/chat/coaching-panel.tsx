@@ -10,12 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { GlobeIcon, BookmarkIcon } from '@radix-ui/react-icons';
 import { toast } from 'sonner';
 
-interface CoachingPanelProps {
-  preCoachingResult: any;
-  conversation: any;
-  onConfirmQuestion: (question: string) => void;
-}
-
 function RecommendationCard({ recommendation, isSelected, onSelect }: {
   recommendation: {
     id: string;
@@ -163,7 +157,6 @@ function ImpactAnalysisCard({ analysis }: { analysis: any }) {
 export function CoachingPanel({
   preCoachingResult,
   conversation,
-  onConfirmQuestion,
 }: CoachingPanelProps) {
   const {
     postCoaching,
@@ -182,19 +175,23 @@ export function CoachingPanel({
   // 대화가 바뀌면 editedQuestion을 userQuestion으로 업데이트
   useEffect(() => {
     setEditedQuestion(conversation?.userQuestion || '');
-  }, [conversation?.userQuestion]);
-
-  // asked 상태가 되면 post 탭으로 전환
-  useEffect(() => {
-    if (isAsked) {
+    // 대화가 바뀌면 탭 상태도 업데이트
+    if (conversation?.state === 'asked') {
       setActiveTab('post');
     } else {
       setActiveTab('pre');
     }
-  }, [isAsked]);
+  }, [conversation]);
 
   // AI 응답에서 post-coaching 정보 추출
-  const aiResponse = conversation?.aiResponse ? JSON.parse(conversation.aiResponse) : null;
+  const aiResponse = (() => {
+    try {
+      return conversation?.aiResponse ? JSON.parse(conversation.aiResponse) : null;
+    } catch (e) {
+      console.error('Error parsing AI response:', e);
+      return null;
+    }
+  })();
   const postCoachingInfo = isAsked && aiResponse ? {
     keywords: aiResponse.keywords,
     summary: aiResponse.summary,
@@ -212,7 +209,9 @@ export function CoachingPanel({
       });
 
       if (response.ok) {
-        await updateConversation(selectedConversation.id, { savedToGlobal: true });
+        const updatedConversation = await updateConversation(selectedConversation.id, { savedToGlobal: true });
+        // 인사이트맵 패널 갱신을 위해 이벤트 발생
+        window.dispatchEvent(new Event('refreshMemories'));
         toast.success('전역 메모리에 저장되었습니다.');
       } else {
         throw new Error('Failed to save to global memory');
@@ -236,7 +235,9 @@ export function CoachingPanel({
       });
 
       if (response.ok) {
-        await updateConversation(selectedConversation.id, { savedToProject: true });
+        const updatedConversation = await updateConversation(selectedConversation.id, { savedToProject: true });
+        // 인사이트맵 패널 갱신을 위해 이벤트 발생
+        window.dispatchEvent(new Event('refreshMemories'));
         toast.success('프로젝트 메모리에 저장되었습니다.');
       } else {
         throw new Error('Failed to save to project memory');

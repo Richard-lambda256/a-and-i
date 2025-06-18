@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // GET: 프롬프트 목록 조회
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const prompts = await prisma.prompt.findMany({
       where: { isActive: true },

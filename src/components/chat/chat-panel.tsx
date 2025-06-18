@@ -61,9 +61,6 @@ export function ChatPanel() {
     selectedProject,
     selectedChatroom,
     selectedConversation,
-    conversations,
-    projects,
-    chatrooms,
     updateConversation,
     setSelectedConversation,
     createConversation,
@@ -71,16 +68,9 @@ export function ChatPanel() {
   } = useProjectStore();
 
   const {
-    preCoaching,
-    postCoaching,
-    isCoachingActive,
     setCoachingActive,
     setRecommendations,
-    selectRecommendation,
     resetCoaching,
-    setMemoryAnalysis,
-    setPatternAnalysis,
-    setImpactAnalysis,
   } = useCoachingStore();
 
   const [message, setMessage] = useState('');
@@ -250,7 +240,17 @@ export function ChatPanel() {
               </div>
               {aiAnswer && (
                 <div className="mt-4 bg-[var(--background)] rounded-lg px-4 py-2">
-                  <ReactMarkdown>{JSON.parse(aiAnswer).answer}</ReactMarkdown>
+                  <ReactMarkdown>
+                    {(() => {
+                      try {
+                        const parsed = typeof aiAnswer === 'string' ? JSON.parse(aiAnswer) : aiAnswer;
+                        return parsed?.answer || '';
+                      } catch (e) {
+                        console.error('Error parsing AI answer:', e);
+                        return '';
+                      }
+                    })()}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>

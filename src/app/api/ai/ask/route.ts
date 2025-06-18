@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/prisma';
-import { formatMemories, formatChatHistory } from '@/lib/prompts';
 import { ASK_PROMPT } from '@/prompts/ask-prompt';
 
 export async function POST(request: NextRequest) {
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
     let parsedResponse;
     try {
       parsedResponse = JSON.parse(text);
-    } catch (error) {
+    } catch {
       // JSON 부분만 추출 시도
       const match = text.match(/\{[\s\S]*\}/);
       if (match) {

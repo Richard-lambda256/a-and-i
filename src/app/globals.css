@@ -179,3 +179,32 @@
   --tw-backdrop-saturate: ;
   --tw-backdrop-sepia: ;
 }
+
+/* ScrollArea 스타일 오버라이드 */
+[data-radix-scroll-area-viewport] {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+[data-radix-scroll-area-viewport] > div {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+[data-radix-scroll-area-viewport] > div > div {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* ScrollArea 부모 컨테이너 스타일 */
+[data-radix-scroll-area-root] {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}

@@ -6,8 +6,8 @@ export interface Conversation {
   userQuestion: string;
   usedQuestion: string;
   aiResponse: string;
-  preCoachingResult?: any;
-  postCoachingResult?: any;
+  preCoachingResult?: unknown;
+  postCoachingResult?: unknown;
   state: ConversationState;
   savedToGlobal: boolean;
   savedToProject: boolean;

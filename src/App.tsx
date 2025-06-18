@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useProjectStore } from './lib/store/project-store';
-import { ProjectList } from './components/ProjectList';
-import { ChatPanel } from './components/ChatPanel';
-import { CoachingPanel } from './components/CoachingPanel';
+import ChatExplorer from './components/explorer/chat-explorer';
+import { ChatPanel } from './components/chat/chat-panel';
+import { CoachingPanel } from './components/chat/coaching-panel';
 
 function App() {
   const { initializeFromLastSession } = useProjectStore();
@@ -14,7 +14,7 @@ function App() {
   return (
     <div className="flex h-screen">
       <div className="w-64 border-r">
-        <ProjectList />
+        <ChatExplorer />
       </div>
       <div className="flex-1 flex">
         <div className="flex-1">

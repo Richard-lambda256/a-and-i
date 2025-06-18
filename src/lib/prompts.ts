@@ -4,10 +4,15 @@ const prisma = new PrismaClient();
 
 type PromptType = 'PRE_COACHING' | 'MAIN_CHAT' | 'POST_COACHING';
 
+interface ChatHistoryItem {
+  question: string;
+  answer: string;
+}
+
 interface Context {
   globalMemories?: string[];
   projectMemories?: string[];
-  chatHistory?: any[];
+  chatHistory?: ChatHistoryItem[];
   projectGuidelines?: string;
   question?: string;
 }
@@ -110,7 +115,7 @@ export function formatMemories(memories: string[] = []): string {
   return memories.map(m => `- ${m}`).join('\n');
 }
 
-export function formatChatHistory(history: any[] = []): string {
+export function formatChatHistory(history: ChatHistoryItem[] = []): string {
   if (!history.length) return '없음';
   return history.map(h => `Q: ${h.question}\nA: ${h.answer}`).join('\n\n');
 }
