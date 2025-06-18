@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApiKeyStore } from '@/lib/store/api-key-store';
+import { useProjectStore } from '@/lib/store/project-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { Card } from '@/components/ui/card';
 export default function APIKeyPage() {
   const router = useRouter();
   const { key, setKey, fetchKey, updateKey } = useApiKeyStore();
+  const { setApiKey } = useProjectStore();
   const [inputKey, setInputKey] = useState(key || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,7 @@ export default function APIKeyPage() {
       const data = await res.json();
       if (data?.id && data?.key) {
         setKey(inputKey, data.id); // 이미 존재하는 키 사용
+        setApiKey(inputKey);
         setLoading(false);
         router.push('/ai/chat');
         return;
@@ -47,6 +50,7 @@ export default function APIKeyPage() {
       const postData = await postRes.json();
       if (postRes.ok && postData?.id) {
         setKey(inputKey, postData.id);
+        setApiKey(inputKey);
         setLoading(false);
         router.push('/ai/chat');
         return;
@@ -59,6 +63,7 @@ export default function APIKeyPage() {
       const ok = await updateKey(inputKey);
       setLoading(false);
       if (ok) {
+        setApiKey(inputKey);
         router.push('/ai/chat');
       } else {
         setError('API Key 저장에 실패했습니다.');

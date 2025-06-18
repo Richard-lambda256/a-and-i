@@ -7,7 +7,7 @@ import Image from "next/image";
 export default function Home() {
   return (
     <>
-      <div className="bg-circuit fixed inset-0" />
+      {/* <div className="bg-circuit fixed inset-0" /> */}
 
       {/* Floating Circuit Lines */}
       <div className="circuit-line" style={{ top: '15%', left: 0, width: '300px', animationDelay: '0s' }} />

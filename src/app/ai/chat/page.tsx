@@ -47,8 +47,8 @@ function GameLoading() {
 
 export default function ChatPage() {
   const router = useRouter();
-  const { apiKey } = useProjectStore();
-  const { fetchKey } = useApiKeyStore();
+  const { apiKey, setApiKey } = useProjectStore();
+  const { fetchKey, key } = useApiKeyStore();
   const [loading, setLoading] = useState(true);
 
   const {
@@ -70,8 +70,10 @@ export default function ChatPage() {
   }
 
   useEffect(() => {
-    fetchKey().finally(() => setLoading(false));
-  }, [fetchKey]);
+    fetchKey().then(() => {
+      if (!key) setApiKey(null);
+    }).finally(() => setLoading(false));
+  }, [fetchKey, key, setApiKey]);
 
   useEffect(() => {
     if (!loading && !apiKey) {

@@ -169,15 +169,15 @@ export function InsightMapPanel() {
                 <TooltipProvider key={conversation.id}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="text-sm p-2 bg-[var(--muted)] rounded cursor-help">
+                      <div className="text-xs p-2 bg-[var(--muted)] rounded cursor-help">
                         <div className="truncate">Q: {conversation.usedQuestion}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-[10px] text-muted-foreground">
                           {new Date(conversation.createdAt).toLocaleString()}
                         </div>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="bg-popover border rounded-md shadow-md">
-                      <p className="max-w-[300px] p-2">Q: {conversation.usedQuestion}</p>
+                      <p className="max-w-[300px] p-2 text-xs">Q: {conversation.usedQuestion}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
