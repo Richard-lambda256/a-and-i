@@ -51,7 +51,7 @@ interface ProjectState {
   setSelectedConversation: (conversation: Conversation | null) => void;
   fetchProjects: () => Promise<Project[]>;
   fetchChatrooms: (projectId: string) => Promise<void>;
-  fetchConversations: (chatroomId: string) => Promise<void>;
+  fetchConversations: (chatroomId: string) => Promise<Conversation[]>;
   createConversation: (chatroomId: string, userQuestion: string) => Promise<Conversation>;
   updateConversation: (id: string, data: Partial<Conversation>) => Promise<Conversation>;
   initializeFromLastSession: () => Promise<void>;
@@ -131,18 +131,28 @@ export const useProjectStore = create<ProjectState>()(
       fetchConversations: async (chatroomId) => {
         try {
           const { apiKey } = get();
-          if (!apiKey) return;
+          if (!apiKey) {
+            console.log('No API key available');
+            return [];
+          }
 
+          console.log('Fetching conversations from server for chatroom:', chatroomId);
           const response = await fetch(`/api/chatrooms/${chatroomId}/conversations`, {
             headers: {
               'Authorization': `Bearer ${apiKey}`,
             },
           });
-          if (!response.ok) throw new Error('Failed to fetch conversations');
+          if (!response.ok) {
+            console.error('Failed to fetch conversations:', response.status);
+            throw new Error('Failed to fetch conversations');
+          }
           const conversations = await response.json();
+          console.log('Received conversations from server:', conversations);
           set({ conversations });
+          return conversations;
         } catch (error) {
           console.error('Error fetching conversations:', error);
+          return [];
         }
       },
       createConversation: async (chatroomId, userQuestion) => {

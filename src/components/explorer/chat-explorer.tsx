@@ -195,9 +195,24 @@ export default function ChatExplorer() {
       setExpandedProjects(new Set([selectedProject.id]));
     }
     if (selectedChatroom?.id) {
+      console.log('Chatroom changed:', selectedChatroom.id);
       setExpandedChatrooms(new Set([selectedChatroom.id]));
+      // 대화방이 변경될 때마다 대화 목록을 새로 가져옴
+      const loadConversations = async () => {
+        console.log('Fetching conversations for chatroom:', selectedChatroom.id);
+        const conversations = await fetchConversations(selectedChatroom.id);
+        console.log('Fetched conversations:', conversations);
+        if (conversations.length > 0) {
+          const lastConvId = localStorage.getItem('last_conversation_id');
+          console.log('Last conversation ID:', lastConvId);
+          const targetConv = lastConvId ? conversations.find(c => c.id === lastConvId) : null;
+          console.log('Selected conversation:', targetConv || conversations[0]);
+          setSelectedConversation(targetConv || conversations[0]);
+        }
+      };
+      loadConversations();
     }
-  }, [selectedProject?.id, selectedChatroom?.id]);
+  }, [selectedProject?.id, selectedChatroom?.id, fetchConversations, setSelectedConversation]);
 
   const toggleProject = (projectId: string) => {
     setExpandedProjects((prev) => {
@@ -416,9 +431,24 @@ export default function ChatExplorer() {
                               <div
                                 key={conversation.id}
                                 className={`p-1.5 rounded cursor-pointer hover:bg-[var(--muted)] w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap flex items-center ${selectedConversation?.id === conversation.id ? 'bg-[var(--primary)]/20 rounded font-bold text-[var(--primary)] shadow-neon' : ''}`}
-                                onClick={() => {
-                                  setSelectedConversation(conversation);
-                                  localStorage.setItem('last_conversation_id', String(conversation.id || ''));
+                                onClick={async () => {
+                                  console.log('Selecting conversation:', conversation.id);
+                                  // 서버에서 최신 대화 상태를 가져옴
+                                  const response = await fetch(`/api/conversations/${conversation.id}`, {
+                                    headers: {
+                                      'Authorization': `Bearer ${projectApiKey || ''}`,
+                                    },
+                                  });
+                                  if (response.ok) {
+                                    const updatedConversation = await response.json();
+                                    console.log('Updated conversation from server:', updatedConversation);
+                                    setSelectedConversation(updatedConversation);
+                                    localStorage.setItem('last_conversation_id', String(updatedConversation.id));
+                                  } else {
+                                    console.error('Failed to fetch conversation:', response.status);
+                                    setSelectedConversation(conversation);
+                                    localStorage.setItem('last_conversation_id', String(conversation.id));
+                                  }
                                 }}
                               >
                                 <span className="w-full min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{conversation.userQuestion || '새 대화'}</span>
