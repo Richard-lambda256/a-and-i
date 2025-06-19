@@ -40,8 +40,31 @@ export async function POST(request: NextRequest) {
       globalMemories: globalMemories.map(m => m.content),
       projectMemories: projectMemories.map(m => m.content),
       projectGuidelines: project?.guideline || '',
-      previousConversations: conversations.map(c => c.userQuestion).filter(Boolean),
+      previousConversations: conversations.map(c => {
+        if (c.postCoachingResult) {
+          try {
+            const postCoaching = typeof c.postCoachingResult === 'string'
+              ? JSON.parse(c.postCoachingResult)
+              : c.postCoachingResult;
+            if (postCoaching.summary) {
+              return postCoaching.summary;
+            }
+          } catch (e) {
+            console.error('Error parsing postCoachingResult:', e);
+          }
+        }
+        return '';
+      }).filter(Boolean),
     };
+
+    console.log('Project guidelines:', project?.guideline);
+    console.log('Context being sent to AI:', {
+      globalMemories: context.globalMemories,
+      projectMemories: context.projectMemories,
+      projectGuidelines: context.projectGuidelines,
+      previousConversations: context.previousConversations
+    });
+
     const promptTemplate = ASK_PROMPT({ question, context });
 
     // 3. AI 응답 생성

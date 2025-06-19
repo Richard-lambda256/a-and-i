@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const { question, projectId } = await request.json();
 
     // 1. 컨텍스트 수집
-    const [globalMemories, projectMemories, project] = await Promise.all([
+    const [globalMemories, projectMemories, project, conversations] = await Promise.all([
       prisma.globalMemory.findMany({
         orderBy: { createdAt: 'desc' },
         take: 5
@@ -41,6 +41,15 @@ export async function POST(request: NextRequest) {
       }),
       prisma.project.findUnique({
         where: { id: projectId }
+      }),
+      // 대화방의 이전 대화들도 가져오기
+      prisma.conversation.findMany({
+        where: {
+          chatroom: { projectId },
+          state: 'asked' // 답변이 완료된 대화만
+        },
+        orderBy: { createdAt: 'asc' },
+        take: 10,
       })
     ]);
 
@@ -49,8 +58,31 @@ export async function POST(request: NextRequest) {
       globalMemories: globalMemories.map(m => m.content),
       projectMemories: projectMemories.map(m => m.content),
       projectGuidelines: project?.guideline || '',
-      previousConversations: [] // pre에서는 대화 이력 없음
+      previousConversations: conversations.map(c => {
+        if (c.postCoachingResult) {
+          try {
+            const postCoaching = typeof c.postCoachingResult === 'string'
+              ? JSON.parse(c.postCoachingResult)
+              : c.postCoachingResult;
+            if (postCoaching.summary) {
+              return postCoaching.summary;
+            }
+          } catch (e) {
+            console.error('Error parsing postCoachingResult:', e);
+          }
+        }
+        return '';
+      }).filter(Boolean)
     };
+
+    console.log('Pre-coaching - Project guidelines:', project?.guideline);
+    console.log('Pre-coaching - Context being sent to AI:', {
+      globalMemories: context.globalMemories,
+      projectMemories: context.projectMemories,
+      projectGuidelines: context.projectGuidelines,
+      previousConversations: context.previousConversations
+    });
+
     const promptTemplate = PRE_COACHING_PROMPT({ question, context });
 
     // 3. AI 응답 생성
